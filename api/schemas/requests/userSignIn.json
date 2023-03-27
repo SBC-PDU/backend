@@ -1,0 +1,26 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema",
+	"$id": "https://sbc-pdu.romanondracek.cz/apiSchemas/requests/userSignIn.json",
+	"type": "object",
+	"title": "User sign in",
+	"additionalProperties": false,
+	"required": [
+		"email",
+		"password"
+	],
+	"properties": {
+		"email": {
+			"$id": "#/properties/email",
+			"type": "string",
+			"format": "email",
+			"title": "Email",
+			"example": "admin@romanondracek.cz"
+		},
+		"password": {
+			"$id": "#/properties/password",
+			"type": "string",
+			"title": "Password",
+			"example": "password"
+		}
+	}
+}

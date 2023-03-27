@@ -1,0 +1,128 @@
+{
+	"$schema": "https://json-schema.org/draft-07/schema",
+	"$id": "https://sbc-pdu.romanondracek.cz/apiSchemas/responses/deviceDetail.json",
+	"title": "PDU device detail",
+	"type": "object",
+	"required": [
+		"id",
+		"name",
+		"macAddress",
+		"outputs",
+		"createdAt",
+		"lastSeen"
+	],
+	"additionalProperties": false,
+	"properties": {
+		"id": {
+			"title": "Device ID",
+			"type": "string",
+			"pattern": "^[0-9a-f]{12}$",
+			"example": "1097bdc19204"
+		},
+		"name": {
+			"title": "Device name",
+			"type": "string",
+			"example": "Prototype PDU"
+		},
+		"macAddress": {
+			"title": "Device MAC address",
+			"type": "string",
+			"pattern": "^[0-9A-Fa-f]{1,2}([.:-]|)(?:[0-9A-Fa-f]{1,2}\\1){4}[0-9A-Fa-f]{1,2}$",
+			"example": "10:97:bd:c1:92:04"
+		},
+		"outputs": {
+			"title": "Device outputs",
+			"type": "array",
+			"additionalItems": false,
+			"items": {
+				"title": "Device output",
+				"type": "object",
+				"required": [
+					"index",
+					"name",
+					"alert",
+					"current",
+					"enabled",
+					"voltage"
+				],
+				"additionalProperties": false,
+				"properties": {
+					"index": {
+						"title": "Output index",
+						"type": "integer",
+						"example": 1
+					},
+					"name": {
+						"title": "Output name",
+						"type": "string",
+						"example": "IoT Gateway"
+					},
+					"alert": {
+						"title": "Output alert status",
+						"type": "boolean",
+						"example": false
+					},
+					"current": {
+						"title": "Current in milliamps",
+						"type": "number",
+						"example": 2503.199951
+					},
+					"enabled": {
+						"title": "Output enabled status",
+						"type": "boolean",
+						"example": true
+					},
+					"voltage": {
+						"title": "Voltage in volts",
+						"type": "number",
+						"example": 4.664
+					}
+				}
+			}
+		},
+		"createdAt": {
+			"title": "Created at",
+			"type": "string",
+			"format": "date-time",
+			"example": "2023-03-22T23:44:49+01:00"
+		},
+		"lastSeen": {
+			"title": "Last seen",
+			"oneOf": [
+				{
+					"type": "string",
+					"format": "date-time"
+				},
+				{
+					"type": "null"
+				}
+			],
+			"example": "2023-03-28T19:01:10Z"
+		}
+	},
+	"example": {
+		"id":"1097bdc19204",
+		"name":"Prototype PDU",
+		"macAddress":"10:97:bd:c1:92:04",
+		"outputs":[
+			{
+				"index":1,
+				"name":"IoT Gateway",
+				"alert":false,
+				"current":2503.199951,
+				"enabled":true,
+				"voltage":4.664
+			},
+			{
+				"index":2,
+				"name":"Phone",
+				"alert":false,
+				"current":377.600006,
+				"enabled":true,
+				"voltage":4.912
+			}
+	],
+		"createdAt":"2023-03-22T23:44:49+01:00",
+		"lastSeen":"2023-03-28T19:01:10Z"
+	}
+}

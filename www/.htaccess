@@ -1,0 +1,34 @@
+# Apache configuration file (see https://httpd.apache.org/docs/current/mod/quickreference.html)
+Require all granted
+
+# disable directory listing
+<IfModule mod_autoindex.c>
+	Options -Indexes
+</IfModule>
+
+<IfModule mod_setenvif.c>
+	SetEnvIf Authorization .+ HTTP_AUTHORIZATION=$0
+</IfModule>
+
+# enable cool URL
+<IfModule mod_rewrite.c>
+	RewriteEngine On
+	# RewriteBase /
+
+	# use HTTPS
+	# RewriteCond %{HTTPS} !on
+	# RewriteRule .? https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+	# prevents files starting with dot to be viewed by browser
+	RewriteRule /\.|^\.(?!well-known/) - [F]
+
+	RewriteRule ^api/(.*)$ index.php [QSA,L,END]
+	RewriteRule ^(.*)$ dist/$1 [L]
+</IfModule>
+
+# enable gzip compression
+<IfModule mod_deflate.c>
+	<IfModule mod_filter.c>
+		AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css application/javascript application/json application/xml image/svg+xml
+	</IfModule>
+</IfModule>

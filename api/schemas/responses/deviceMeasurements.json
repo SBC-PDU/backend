@@ -1,0 +1,146 @@
+{
+	"$schema": "https://json-schema.org/draft-07/schema",
+	"$id": "https://sbc-pdu.romanondracek.cz/apiSchemas/responses/deviceMeasurements.json",
+	"title": "PDU device measurements",
+	"type": "array",
+	"additionalItems": false,
+	"items": {
+		"title": "PDU device output measurements",
+		"type": "object",
+		"required": [
+			"index",
+			"measurements"
+		],
+		"additionalProperties": false,
+		"properties": {
+			"index": {
+				"title": "Output index",
+				"type": "integer",
+				"example": 1
+			},
+			"measurements": {
+				"title": "Output measurements",
+				"type": "object",
+				"required": [
+					"current",
+					"voltage"
+				],
+				"additionalProperties": false,
+				"properties": {
+					"current": {
+						"title": "Measured current",
+						"type": "array",
+						"additionalItems": false,
+						"items": {
+							"title": "Measured current",
+							"type": "object",
+							"required": [
+								"time",
+								"value"
+							],
+							"additionalProperties": false,
+							"properties": {
+								"time": {
+									"title": "Measurement time",
+									"type": "string",
+									"format": "date-time",
+									"example": "2023-03-29T23:19:00Z"
+								},
+								"value": {
+									"title": "Measured current value in milliamperes",
+									"type": [
+										"null",
+										"number"
+									],
+									"example": 2535.2800048999998
+								}
+							}
+						}
+					},
+					"voltage": {
+						"title": "Measured voltage",
+						"type": "array",
+						"additionalItems": false,
+						"items": {
+							"title": "Measured voltage",
+							"type": "object",
+							"required": [
+								"time",
+								"value"
+							],
+							"additionalProperties": false,
+							"properties": {
+								"time": {
+									"title": "Measurement time",
+									"type": "string",
+									"format": "date-time",
+									"example": "2023-03-29T23:19:00Z"
+								},
+								"value": {
+									"title": "Measured voltage value in volts",
+									"type": [
+										"null",
+										"number"
+									],
+									"example": 4.566933333333332
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"example": [
+		{
+			"index": 1,
+			"measurements": {
+				"current": [
+					{
+						"time": "2023-03-29T23:19:00Z",
+						"value": null
+					},
+					{
+						"time": "2023-03-29T23:19:30Z",
+						"value": 1.3333333333333335
+					}
+				],
+				"voltage": [
+					{
+						"time": "2023-03-29T23:19:00Z",
+						"value": null
+					},
+					{
+						"time": "2023-03-29T23:19:30Z",
+						"value": 0.0
+					}
+				]
+			}
+		},
+		{
+			"index": "2",
+			"measurements": {
+				"current": [
+					{
+						"time": "2023-03-29T23:19:00Z",
+						"value": null
+					},
+					{
+						"time": "2023-03-29T23:19:30Z",
+						"value": 2535.2800048999998
+					}
+				],
+				"voltage": [
+					{
+						"time": "2023-03-29T23:19:00Z",
+						"value": null
+					},
+					{
+						"time": "2023-03-29T23:19:30Z",
+						"value": 4.566933333333332
+					}
+				]
+			}
+		}
+	]
+}

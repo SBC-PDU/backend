@@ -1,0 +1,55 @@
+# Copyright 2022-2023 Roman Ondráček
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+extensions:
+	sentry: Contributte\Sentry\DI\SentryExtension
+
+services:
+	- Contributte\Sentry\Performance\NetteApplicationMonitor
+	application.application:
+		setup:
+			- @Contributte\Sentry\Performance\NetteApplicationMonitor::hook(@self, 'onRequest')
+			- @Contributte\Sentry\Performance\NetteApplicationMonitor::hook(@self, 'onShutdown')
+sentry:
+	enable: true
+	integrations: true
+	client:
+		dsn: %sentry.dsn%
+		integrations: [
+			# Sentry
+			Sentry\Integration\EnvironmentIntegration()
+			Sentry\Integration\ErrorListenerIntegration()
+			Sentry\Integration\ExceptionListenerIntegration()
+			Sentry\Integration\FatalErrorListenerIntegration()
+			Sentry\Integration\FrameContextifierIntegration(null)
+			Sentry\Integration\ModulesIntegration()
+			Sentry\Integration\RequestIntegration(null)
+			Sentry\Integration\TransactionIntegration()
+			# Nette
+			Contributte\Sentry\Integration\NetteApplicationIntegration()
+			Contributte\Sentry\Integration\NetteHttpIntegration()
+			Contributte\Sentry\Integration\NetteSecurityIntegration()
+			# Custom
+			App\Models\Sentry\SentryUserIntegration()
+		]
+		traces_sample_rate:  1.0
+		# Set a sampling rate for profiling - this is relative to traces_sample_rate
+		profiles_sample_rate: 1.0
+	logger:
+		captureMessages: true
+		captureLevels:
+			- warning
+			- error
+			- exception
+			- critical

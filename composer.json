@@ -1,0 +1,103 @@
+{
+	"name": "roman3349/sbc_pdu",
+	"description": "SBC PDU management web application",
+	"type": "project",
+	"keywords": [
+		"nette"
+	],
+	"homepage": "https://github.com/SBC-PDU/backend",
+	"license": "Apache-2.0",
+	"authors": [
+		{
+			"name": "Roman Ondráček",
+			"homepage": "https://romanondracek.cz/",
+			"email": "mail@romanondracek.cz",
+			"role": "developer"
+		}
+	],
+	"require": {
+		"php": ">=8.1.0",
+		"ext-json": "*",
+		"ext-openssl": "*",
+		"ext-posix": "*",
+		"contributte/apitte": "^v0.10.2",
+		"contributte/console": "^v0.9.2",
+		"contributte/console-extra": "^v0.7.2",
+		"contributte/monolog": "^v0.5.1",
+		"contributte/sentry": "^v0.2.0",
+		"contributte/translation": "^v2.0.3",
+		"darsyn/ip": "^4.1.0",
+		"egulias/email-validator": "^4.0.1",
+		"guzzlehttp/guzzle": "^7.5.0",
+		"influxdata/influxdb-client-php": "^3.2.0",
+		"justinrainbow/json-schema": "^5.2.12",
+		"latte/latte": "^v3.0.6",
+		"lcobucci/clock": "^3.0",
+		"lcobucci/jwt": "^5.0.0",
+		"nette/application": "^v3.1.10",
+		"nette/bootstrap": "^v3.2.0",
+		"nette/caching": "^v3.2.2",
+		"nette/di": "^v3.1.2",
+		"nette/finder": "^v3.0.0",
+		"nette/http": "^v3.2.2",
+		"nette/mail": "^v4.0.0",
+		"nette/neon": "^v3.4.0",
+		"nette/php-generator": "^v4.0.6",
+		"nette/robot-loader": "^v4.0.0",
+		"nette/safe-stream": "^v3.0.0",
+		"nette/security": "^v3.1.7",
+		"nette/utils": "v4.0.0 as v3.2.9",
+		"nettrine/annotations": "^v0.7.0",
+		"nettrine/cache": "^v0.3.0",
+		"nettrine/dbal": "^v0.8.1",
+		"nettrine/fixtures": "^v0.6.3",
+		"nettrine/migrations": "^v0.8.0",
+		"nettrine/orm": "^v0.8.3",
+		"php-http/guzzle7-adapter": "^1.0.0",
+		"php-mqtt/client": "^v1.8.0",
+		"ramsey/uuid": "^4.7.3",
+		"ramsey/uuid-doctrine": "^2.0.0",
+		"tracy/tracy": "^v2.10.0"
+	},
+	"require-dev": {
+		"contributte/qa": "^v0.3.0",
+		"mockery/mockery": "^1.5.1",
+		"nette/tester": "^v2.5.0",
+		"ninjify/nunjuck": "^v0.4.0",
+		"phpstan/phpstan": "1.10.7",
+		"phpstan/phpstan-deprecation-rules": "^1.1.3",
+		"phpstan/phpstan-doctrine": "^1.3.37",
+		"phpstan/phpstan-mockery": "^1.1.1",
+		"phpstan/phpstan-nette": "^1.2.4",
+		"phpstan/phpstan-strict-rules": "^1.5.0",
+		"phpstan/phpstan-symfony": "^1.2.23"
+	},
+	"autoload": {
+		"psr-4": {
+			"App\\": "app"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"Tests\\": "tests"
+		}
+	},
+	"support": {
+		"email": "mail@romanondracek.cz",
+		"issues": "https://github.com/SBC-PDU/backend/issues",
+		"source": "https://github.com/SBC-PDU/backend"
+	},
+	"minimum-stability": "dev",
+	"prefer-stable": true,
+	"config": {
+		"platform": {
+			"php": "8.1.0"
+		},
+		"sort-packages": true,
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true,
+			"composer/package-versions-deprecated": true,
+			"php-http/discovery": true
+		}
+	}
+}

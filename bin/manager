@@ -1,0 +1,16 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types = 1);
+
+use App\Kernel;
+use Contributte\Console\Application;
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+// Creates DI container
+$container = Kernel::boot()->createContainer();
+// Gets application from DI container
+$application = $container->getByType(Application::class);
+// Runs application
+exit($application->run());

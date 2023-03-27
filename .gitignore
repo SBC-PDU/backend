@@ -1,0 +1,17 @@
+# Local application configuration
+app/config/local.neon
+app/cert/
+# Composer
+vendor/
+composer.lock
+# PhpStorm IDE
+.idea/
+# Nette Tester
+tests/output/
+tests/*/output/
+tests/*/*/output/
+tests/*/*/*/output/
+tests/*/*/*/*/output/
+tests/tmp/
+coverage.html
+coverage.xml

@@ -1,0 +1,94 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema",
+	"$id": "https://sbc-pdu.romanondracek.cz/apiSchemas/responses/userSignedIn.json",
+	"type": "object",
+	"title": "Signed in user info and JWT token",
+	"additionalProperties": false,
+	"required": [
+		"info",
+		"token"
+	],
+	"properties": {
+		"info": {
+			"$id": "#/properties/info",
+			"type": "object",
+			"required": [
+				"id",
+				"name",
+				"email",
+				"language",
+				"role",
+				"state"
+			],
+			"properties": {
+				"id": {
+					"$id": "#/properties/info/properties/id",
+					"type": "integer",
+					"title": "User ID",
+					"example": 1
+				},
+				"name": {
+					"$id": "#/properties/info/properties/name",
+					"type": "string",
+					"title": "Name",
+					"example": "Administrator"
+				},
+				"email": {
+					"$id": "#/properties/info/properties/email",
+					"type": "string",
+					"format": "email",
+					"title": "Email",
+					"example": "admin@romanondracek.cz"
+				},
+				"language": {
+					"$id": "#/properties/info/properties/language",
+					"type": "string",
+					"title": "Language",
+					"enum": [
+						"cs",
+						"en"
+					],
+					"default": "en",
+					"example": "en"
+				},
+				"role": {
+					"$id": "#/properties/info/properties/role",
+					"type": "string",
+					"title": "Role",
+					"enum": [
+						"admin",
+						"normal"
+					],
+					"default": "normal",
+					"example": "normal"
+				},
+				"state": {
+					"$id": "#/properties/info/properties/state",
+					"type": "string",
+					"title": "Account state",
+					"enum": [
+						"unverified",
+						"verified",
+						"blocked"
+					],
+					"example": "verified"
+				}
+			}
+		},
+		"token": {
+			"$id": "#/properties/token",
+			"oneOf": [
+				{
+					"type": "string"
+				},
+				{
+					"type": "null"
+				}
+			],
+			"type": "string",
+			"pattern": "^[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.?[A-Za-z0-9-_.+/=]*$",
+			"title": "JSON Web Token",
+			"example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJpc3MiOiJBU1VTLUI4NS1QUk8tR0FNRVIiLCJqdGkiOiJBU1VTLUI4NS1QUk8tR0FNRVIiLCJpYXQiOiIxNTg3MjE2NjMzLjQ2NDEzNyIsImV4cCI6IjE1ODczMDMwMzMuNDY0MTM3IiwidWlkIjoxfQ."
+		}
+	}
+}

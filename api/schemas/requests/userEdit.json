@@ -1,0 +1,56 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema",
+	"$id": "https://sbc-pdu.romanondracek.cz/apiSchemas/requests/userEdit.json",
+	"type": "object",
+	"title": "User Edit",
+	"additionalProperties": false,
+	"required": [
+		"name",
+		"email",
+		"language",
+		"role"
+	],
+	"properties": {
+		"name": {
+			"$id": "#/properties/name",
+			"type": "string",
+			"title": "Name",
+			"minLength": 1,
+			"example": "Administrator"
+		},
+		"email": {
+			"$id": "#/properties/email",
+			"type": "string",
+			"format": "email",
+			"title": "Email",
+			"example": "admin@romanondracek.cz"
+		},
+		"language": {
+			"$id": "#/properties/language",
+			"type": "string",
+			"title": "Language",
+			"enum": [
+				"cs",
+				"en"
+			],
+			"example": "en"
+		},
+		"role": {
+			"$id": "#/properties/role",
+			"type": "string",
+			"title": "Role",
+			"enum": [
+				"admin",
+				"normal"
+			],
+			"example": "normal"
+		},
+		"baseUrl": {
+			"$id": "#/properties/baseUrl",
+			"type": "string",
+			"format": "url",
+			"title": "Frontend base URL",
+			"example": "http://localhost/"
+		}
+	}
+}

@@ -1,0 +1,84 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema",
+	"$id": "https://sbc-pdu.romanondracek.cz/apiSchemas/requests/accountEdit.json",
+	"type": "object",
+	"title": "User account edit",
+	"additionalProperties": false,
+	"if": {
+		"properties": {
+			"changePassword": {
+				"enum": [
+					true
+				]
+			}
+		}
+	},
+	"then": {
+		"required": [
+			"name",
+			"email",
+			"language",
+			"oldPassword",
+			"newPassword"
+		]
+	},
+	"else": {
+		"required": [
+			"name",
+			"email",
+			"language"
+		]
+	},
+	"properties": {
+		"name": {
+			"$id": "#/properties/name",
+			"type": "string",
+			"title": "Name",
+			"minLength": 1,
+			"example": "Administrator"
+		},
+		"email": {
+			"$id": "#/properties/email",
+			"type": "string",
+			"format": "email",
+			"title": "Email",
+			"example": "admin@romanondracek.cz"
+		},
+		"language": {
+			"$id": "#/properties/language",
+			"type": "string",
+			"title": "Language",
+			"enum": [
+				"cs",
+				"en"
+			],
+			"example": "en"
+		},
+		"changePassword": {
+			"$id": "#/properties/changePassword",
+			"type": "boolean",
+			"title": "Change password?",
+			"example": false,
+			"default": false
+		},
+		"oldPassword": {
+			"$id": "#/properties/oldPassword",
+			"type": "string",
+			"title": "Current password",
+			"example": "Curr3nt passw0rd"
+		},
+		"newPassword": {
+			"$id": "#/properties/newPassword",
+			"type": "string",
+			"title": "New password",
+			"example": "N3w p@ssw0rd"
+		},
+		"baseUrl": {
+			"$id": "#/properties/baseUrl",
+			"type": "string",
+			"format": "url",
+			"title": "Frontend base URL",
+			"example": "http://localhost/"
+		}
+	}
+}

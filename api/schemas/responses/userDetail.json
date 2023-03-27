@@ -1,0 +1,68 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema",
+	"$id": "https://sbc-pdu.romanondracek.cz/apiSchemas/responses/userDetail.json",
+	"type": "object",
+	"title": "User Detail",
+	"additionalProperties": false,
+	"required": [
+		"id",
+		"name",
+		"email",
+		"language",
+		"role",
+		"state"
+	],
+	"properties": {
+		"id": {
+			"$id": "#/properties/id",
+			"type": "integer",
+			"title": "User ID",
+			"example": 1
+		},
+		"name": {
+			"$id": "#/properties/name",
+			"type": "string",
+			"title": "Name",
+			"example": "Administrator"
+		},
+		"email": {
+			"$id": "#/properties/email",
+			"type": "string",
+			"format": "email",
+			"title": "Email",
+			"example": "admin@romanondracek.cz"
+		},
+		"language": {
+			"$id": "#/properties/language",
+			"type": "string",
+			"title": "Language",
+			"enum": [
+				"cs",
+				"en"
+			],
+			"default": "en",
+			"example": "en"
+		},
+		"role": {
+			"$id": "#/properties/role",
+			"type": "string",
+			"title": "Role",
+			"enum": [
+				"admin",
+				"normal"
+			],
+			"default": "normal",
+			"example": "normal"
+		},
+		"state": {
+			"$id": "#/properties/state",
+			"type": "string",
+			"title": "Account state",
+			"enum": [
+				"unverified",
+				"verified"
+			],
+			"example": "verified"
+		}
+	}
+}

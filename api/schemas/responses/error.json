@@ -1,0 +1,31 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema",
+	"$id": "https://sbc-pdu.romanondracek.cz/apiSchemas/responses/error.json",
+	"type": "object",
+	"title": "Error message",
+	"required": [
+		"code",
+		"message"
+	],
+	"additionalProperties": false,
+	"properties": {
+		"status": {
+			"$id": "#/properties/status",
+			"type": "string",
+			"title": "Status",
+			"example": "error"
+		},
+		"code": {
+			"$id": "#/properties/code",
+			"type": "integer",
+			"title": "Error code",
+			"example": 400
+		},
+		"message": {
+			"$id": "#/properties/message",
+			"type": "string",
+			"title": "Error message",
+			"example": "Invalid JSON syntax"
+		}
+	}
+}

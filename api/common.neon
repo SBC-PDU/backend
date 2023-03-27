@@ -1,0 +1,94 @@
+# Copyright 2022-2023 Roman Ondráček
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+info:
+	title: SBC PDU management API specification
+	version: '1.0.0'
+	license:
+		name: Apache 2.0
+		url: https://www.apache.org/licenses/LICENSE-2.0.html
+	contact:
+		name: Roman Ondráček
+		email: mail@romanondracek.cz
+servers:
+	-
+		url: '{protocol}://{server}/'
+		variables:
+			protocol:
+				enum:
+					- http
+					- https
+				default: https
+			server:
+				default: sbc-pdu.romanondracek.cz/api
+components:
+	responses:
+		BadRequest:
+			description: Bad request
+			content:
+				'application/json':
+					schema:
+						$ref: '#/components/schemas/Error'
+		Forbidden:
+			description: Do not have appropriate permissions
+		ServerError:
+			description: Server error
+			content:
+				'application/json':
+					schema:
+						$ref: '#/components/schemas/Error'
+		UnauthorizedError:
+			description: API key or user token is missing or invalid
+			headers:
+				WWW-Authenticate:
+					schema:
+						type: string
+	schemas:
+		AccountEdit:
+			$ref: https://sbc-pdu.romanondracek.cz/apiSchemas/requests/accountEdit.json
+		DeviceAdd:
+			$ref: https://sbc-pdu.romanondracek.cz/apiSchemas/requests/deviceAdd.json
+		DeviceDetail:
+			$ref: https://sbc-pdu.romanondracek.cz/apiSchemas/responses/deviceDetail.json
+		DeviceMeasurements:
+			$ref: https://sbc-pdu.romanondracek.cz/apiSchemas/responses/deviceMeasurements.json
+		DeviceModify:
+			$ref: https://sbc-pdu.romanondracek.cz/apiSchemas/requests/deviceModify.json
+		DeviceList:
+			$ref: https://sbc-pdu.romanondracek.cz/apiSchemas/responses/deviceList.json
+		Error:
+			$ref: https://sbc-pdu.romanondracek.cz/apiSchemas/responses/error.json
+		OpenApiSpecification:
+			$ref: https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/schemas/v3.0/schema.json
+		PasswordReset:
+			$ref: https://sbc-pdu.romanondracek.cz/apiSchemas/requests/passwordReset.json
+		PasswordRecovery:
+			$ref: https://sbc-pdu.romanondracek.cz/apiSchemas/requests/passwordRecovery.json
+		UserAdd:
+			$ref: https://sbc-pdu.romanondracek.cz/apiSchemas/requests/userAdd.json
+		UserDetail:
+			$ref: https://sbc-pdu.romanondracek.cz/apiSchemas/responses/userDetail.json
+		UserEdit:
+			$ref: https://sbc-pdu.romanondracek.cz/apiSchemas/requests/userEdit.json
+		UserSignIn:
+			$ref: https://sbc-pdu.romanondracek.cz/apiSchemas/requests/userSignIn.json
+		UserSignedIn:
+			$ref: https://sbc-pdu.romanondracek.cz/apiSchemas/responses/userSignedIn.json
+	securitySchemes:
+		bearerAuth:
+			type: http
+			scheme: 'bearer'
+			bearerFormat: JWT
+security:
+	- bearerAuth: []
