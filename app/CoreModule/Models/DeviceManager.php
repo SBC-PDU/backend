@@ -22,7 +22,6 @@ namespace App\CoreModule\Models;
 
 use App\CoreModule\Enums\MeasurementTimeRange;
 use App\Models\Database\Entities\Device;
-use App\Models\Database\Entities\DeviceOutput;
 use App\Models\Database\EntityManager;
 use App\Models\Database\Repositories\DeviceRepository;
 use App\Models\MqttClientFactory;

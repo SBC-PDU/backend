@@ -21,36 +21,36 @@ declare(strict_types = 1);
 namespace App\Models\Database\Repositories;
 
 use App\Exceptions\ResourceNotFoundException;
-use App\Models\Database\Entities\UserVerification;
+use App\Models\Database\Entities\UserInvitation;
 use Doctrine\ORM\EntityRepository;
 
 /**
  * User verification repository
- * @extends EntityRepository<UserVerification>
+ * @extends EntityRepository<UserInvitation>
  */
-class UserVerificationRepository extends EntityRepository {
+class UserInvitationRepository extends EntityRepository {
 
 	/**
-	 * Finds the verification by UUID
+	 * Finds the invitation by UUID
 	 * @param string $uuid UUID
-	 * @return UserVerification|null User verification entity
+	 * @return UserInvitation|null User invitation entity
 	 */
-	public function findOneByUuid(string $uuid): ?UserVerification {
+	public function findOneByUuid(string $uuid): ?UserInvitation {
 		return $this->findOneBy(['uuid' => $uuid]);
 	}
 
 	/**
-	 * Returns the verification by UUID
-	 * @param string $uuid Verification UUID
-	 * @return UserVerification User verification entity
-	 * @throws ResourceNotFoundException Verification not found
+	 * Returns the invitation by UUID
+	 * @param string $uuid Invitation UUID
+	 * @return UserInvitation User invitation entity
+	 * @throws ResourceNotFoundException Invitation not found
 	 */
-	public function getByUuid(string $uuid): UserVerification {
-		$verification = $this->findOneByUuid($uuid);
-		if (!$verification instanceof UserVerification) {
-			throw new ResourceNotFoundException('Verification not found');
+	public function getByUuid(string $uuid): UserInvitation {
+		$invitation = $this->findOneBy(['uuid' => $uuid]);
+		if (!$invitation instanceof UserInvitation) {
+			throw new ResourceNotFoundException('Invitation not found');
 		}
-		return $verification;
+		return $invitation;
 	}
 
 }

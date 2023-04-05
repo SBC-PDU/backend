@@ -20,6 +20,7 @@ declare(strict_types = 1);
 
 namespace App\Models\Database\Repositories;
 
+use App\Exceptions\ResourceNotFoundException;
 use App\Models\Database\Entities\User;
 use App\Models\Database\Enums\UserRole;
 use Doctrine\ORM\EntityRepository;
@@ -37,6 +38,34 @@ class UserRepository extends EntityRepository {
 	 */
 	public function findOneByEmail(string $email): ?User {
 		return $this->findOneBy(['email' => $email]);
+	}
+
+	/**
+	 * Returns the user by e-mail address
+	 * @param string $email E-mail address
+	 * @return User User entity
+	 * @throws ResourceNotFoundException User not found
+	 */
+	public function getByEmail(string $email): User {
+		$user = $this->findOneByEmail($email);
+		if (!$user instanceof User) {
+			throw new ResourceNotFoundException('User not found');
+		}
+		return $user;
+	}
+
+	/**
+	 * Returns the user by ID
+	 * @param int $id User ID
+	 * @return User User entity
+	 * @throws ResourceNotFoundException User not found
+	 */
+	public function getById(int $id): User {
+		$user = $this->find($id);
+		if (!$user instanceof User) {
+			throw new ResourceNotFoundException('User not found');
+		}
+		return $user;
 	}
 
 	/**

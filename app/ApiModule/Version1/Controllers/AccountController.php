@@ -33,14 +33,17 @@ use App\ApiModule\Version1\Models\RestApiSchemaValidator;
 use App\ApiModule\Version1\RequestAttributes;
 use App\ApiModule\Version1\Utils\BaseUrlHelper;
 use App\CoreModule\Models\UserManager;
+use App\Exceptions\BlockedAccountException;
+use App\Exceptions\ConflictedEmailAddressException;
+use App\Exceptions\InvalidAccountStateException;
 use App\Exceptions\InvalidEmailAddressException;
 use App\Exceptions\InvalidPasswordException;
+use App\Exceptions\InvalidUserLanguageException;
+use App\Exceptions\ResourceExpiredException;
+use App\Exceptions\ResourceNotFoundException;
 use App\Models\Database\Entities\User;
 use App\Models\Database\EntityManager;
-use App\Models\Database\Enums\AccountState;
-use App\Models\Database\Enums\UserLanguage;
 use Nette\Mail\SendException;
-use ValueError;
 
 /**
  * Account controller
@@ -79,6 +82,9 @@ class AccountController extends BaseController {
 	')]
 	public function get(ApiRequest $request, ApiResponse $response): ApiResponse {
 		$user = $request->getAttribute(RequestAttributes::AppLoggedUser);
+		if (!$user instanceof User) {
+			throw new ClientErrorException('API key is used', ApiResponse::S403_FORBIDDEN);
+		}
 		return $response->writeJsonObject($user);
 	}
 
@@ -98,47 +104,33 @@ class AccountController extends BaseController {
 				description: Success
 			"400":
 				$ref: "#/components/responses/BadRequest"
+			"403":
+				$ref: "#/components/responses/Forbidden"
 			"409":
 				description: Username or e-mail address is already used
 	')]
 	public function edit(ApiRequest $request, ApiResponse $response): ApiResponse {
 		$baseUrl = BaseUrlHelper::get($request);
 		$user = $request->getAttribute(RequestAttributes::AppLoggedUser);
-		assert($user instanceof User);
+		if (!$user instanceof User) {
+			throw new ClientErrorException('API key is used', ApiResponse::S403_FORBIDDEN);
+		}
 		$this->validator->validateRequest('accountEdit', $request);
 		$json = $request->getJsonBody();
-		$user->name = $json['name'];
 		try {
-			$user->language = UserLanguage::from($json['language']);
-		} catch (ValueError $e) {
-			throw new ClientErrorException('Invalid language', ApiResponse::S400_BAD_REQUEST, $e);
-		}
-			$email = $json['email'];
-		if ($this->manager->checkEmailUniqueness($email, $user->getId())) {
-			throw new ClientErrorException('E-main address is already used', ApiResponse::S409_CONFLICT);
-		}
-		try {
-			$user->setEmail($email);
-		} catch (InvalidEmailAddressException $e) {
-			throw new ClientErrorException($e->getMessage(), ApiResponse::S400_BAD_REQUEST, $e);
-		}
-		if (($json['changePassword'] ?? false) === true) {
-			try {
+			$user->editFromJson($json);
+			if (($json['changePassword'] ?? false) === true) {
 				$user->changePassword($json['oldPassword'], $json['newPassword']);
-			} catch (InvalidPasswordException $e) {
-				throw new ClientErrorException($e->getMessage(), ApiResponse::S400_BAD_REQUEST, $e);
 			}
+			$this->manager->edit($user, $baseUrl);
+			return $response->withStatus(ApiResponse::S200_OK);
+		} catch (InvalidEmailAddressException | InvalidPasswordException $e) {
+			throw new ClientErrorException($e->getMessage(), ApiResponse::S400_BAD_REQUEST);
+		} catch (InvalidUserLanguageException) {
+			throw new ClientErrorException('Invalid language', ApiResponse::S400_BAD_REQUEST);
+		} catch (ConflictedEmailAddressException) {
+			throw new ClientErrorException('E-mail address is already used', ApiResponse::S409_CONFLICT);
 		}
-		$this->entityManager->persist($user);
-		if ($user->hasChangedEmail()) {
-			try {
-				$this->manager->sendVerificationEmail($user, $baseUrl);
-			} catch (SendException $e) {
-				// Ignore failure
-			}
-		}
-		$this->entityManager->flush();
-		return $response->withStatus(ApiResponse::S200_OK);
 	}
 
 	#[Path('/verification/resend')]
@@ -156,13 +148,15 @@ class AccountController extends BaseController {
 	public function resendVerification(ApiRequest $request, ApiResponse $response): ApiResponse {
 		$baseUrl = BaseUrlHelper::get($request);
 		$user = $request->getAttribute(RequestAttributes::AppLoggedUser);
-		if ($user->state === AccountState::Verified) {
-			throw new ClientErrorException('User is already verified', ApiResponse::S400_BAD_REQUEST);
+		if (!$user instanceof User) {
+			throw new ClientErrorException('API key is used', ApiResponse::S403_FORBIDDEN);
 		}
 		try {
 			$this->manager->sendVerificationEmail($user, $baseUrl);
 		} catch (SendException $e) {
 			throw new ServerErrorException('Unable to send the e-mail', ApiResponse::S500_INTERNAL_SERVER_ERROR, $e);
+		} catch (InvalidAccountStateException $e) {
+			throw new ClientErrorException('User is already verified', ApiResponse::S400_BAD_REQUEST, $e);
 		}
 		return $response->withStatus(ApiResponse::S200_OK);
 	}
@@ -190,34 +184,25 @@ class AccountController extends BaseController {
 	#[RequestParameter(name: 'uuid', type: 'integer', description: 'User verification UUID')]
 	public function verify(ApiRequest $request, ApiResponse $response): ApiResponse {
 		$baseUrl = BaseUrlHelper::get($request);
-		$repository = $this->entityManager->getUserVerificationRepository();
-		$verification = $repository->findOneByUuid($request->getParameter('uuid'));
-		if ($verification === null) {
+		try {
+			$verification = $this->entityManager->getUserVerificationRepository()
+				->getByUuid($request->getParameter('uuid'));
+			$this->manager->verify($verification, $baseUrl);
+		} catch (ResourceNotFoundException) {
 			throw new ClientErrorException('User verification not found', ApiResponse::S404_NOT_FOUND);
+		} catch (ResourceExpiredException) {
+			throw new ClientErrorException('Verification link expired', ApiResponse::S410_GONE);
+		} catch (InvalidAccountStateException) {
+			throw new ClientErrorException('User is already verified', ApiResponse::S400_BAD_REQUEST);
+		} catch (BlockedAccountException) {
+			throw new ClientErrorException('User is blocked', ApiResponse::S403_FORBIDDEN);
 		}
 		$user = $verification->user;
-		switch ($user->state) {
-			case AccountState::Verified:
-				throw new ClientErrorException('User is already verified', ApiResponse::S400_BAD_REQUEST);
-			case AccountState::Unverified:
-				if ($verification->isExpired()) {
-					$this->manager->sendVerificationEmail($user, $baseUrl);
-					throw new ClientErrorException('Verification link expired', ApiResponse::S410_GONE);
-				}
-				$user->state = AccountState::Verified;
-				$this->entityManager->persist($user);
-				break;
-			case AccountState::BlockedUnverified:
-			case AccountState::BlockedVerified:
-				throw new ClientErrorException('User has been blocked', ApiResponse::S403_FORBIDDEN);
-		}
-		$this->entityManager->flush();
 		$json = [
 			'info' => $user->jsonSerialize(),
 			'token' => $this->manager->createJwt($user),
 		];
-		$response = $response->writeJsonBody($json)
-			->withStatus(ApiResponse::S200_OK);
+		$response = $response->writeJsonBody($json)->withStatus(ApiResponse::S200_OK);
 		return $this->validator->validateResponse('userSignedIn', $response);
 	}
 

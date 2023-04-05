@@ -24,10 +24,12 @@ use App\Models\Database\Entities\Device;
 use App\Models\Database\Entities\DeviceOutput;
 use App\Models\Database\Entities\PasswordRecovery;
 use App\Models\Database\Entities\User;
+use App\Models\Database\Entities\UserInvitation;
 use App\Models\Database\Entities\UserVerification;
 use App\Models\Database\Repositories\DeviceOutputRepository;
 use App\Models\Database\Repositories\DeviceRepository;
 use App\Models\Database\Repositories\PasswordRecoveryRepository;
+use App\Models\Database\Repositories\UserInvitationRepository;
 use App\Models\Database\Repositories\UserRepository;
 use App\Models\Database\Repositories\UserVerificationRepository;
 
@@ -58,6 +60,14 @@ trait TRepositories {
 	 */
 	public function getPasswordRecoveryRepository(): PasswordRecoveryRepository {
 		return $this->getRepository(PasswordRecovery::class);
+	}
+
+	/**
+	 * Returns the user invitation repository
+	 * @return UserInvitationRepository User invitation repository
+	 */
+	public function getUserInvitationRepository(): UserInvitationRepository {
+		return $this->getRepository(UserInvitation::class);
 	}
 
 	/**

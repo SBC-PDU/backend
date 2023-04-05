@@ -22,20 +22,21 @@ namespace App\Models\Database\Entities;
 
 use App\Exceptions\InvalidEmailAddressException;
 use App\Exceptions\InvalidPasswordException;
+use App\Exceptions\InvalidUserLanguageException;
+use App\Exceptions\InvalidUserRoleException;
 use App\Models\Database\Attributes\TCreatedAt;
 use App\Models\Database\Attributes\TId;
 use App\Models\Database\Enums\AccountState;
 use App\Models\Database\Enums\UserLanguage;
 use App\Models\Database\Enums\UserRole;
 use App\Models\Database\Repositories\UserRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Egulias\EmailValidator\EmailValidator;
 use Egulias\EmailValidator\Validation\DNSCheckValidation;
 use Egulias\EmailValidator\Validation\MultipleValidationWithAnd;
 use Egulias\EmailValidator\Validation\RFCValidation;
 use JsonSerializable;
+use ValueError;
 use function in_array;
 use function password_hash;
 use function password_verify;
@@ -53,6 +54,24 @@ class User implements JsonSerializable {
 	use TId;
 
 	/**
+	 * @var PasswordRecovery|null Password recovery
+	 */
+	#[ORM\OneToOne(mappedBy: 'user', targetEntity: PasswordRecovery::class, cascade: ['persist'], orphanRemoval: true)]
+	public ?PasswordRecovery $passwordRecovery = null;
+
+	/**
+	 * @var UserInvitation|null User invitation
+	 */
+	#[ORM\OneToOne(mappedBy: 'user', targetEntity: UserInvitation::class, cascade: ['persist'], orphanRemoval: true)]
+	public ?UserInvitation $invitation = null;
+
+	/**
+	 * @var UserVerification|null User verification
+	 */
+	#[ORM\OneToOne(mappedBy: 'user', targetEntity: UserVerification::class, cascade: ['persist'], orphanRemoval: true)]
+	public ?UserVerification $verification = null;
+
+	/**
 	 * @var string User's email
 	 */
 	#[ORM\Column(type: 'string', length: 255, unique: true)]
@@ -64,22 +83,21 @@ class User implements JsonSerializable {
 	private bool $emailChanged = false;
 
 	/**
-	 * @var string Password hash
+	 * @var bool Password changed
 	 */
-	#[ORM\Column(type: 'string', length: 255)]
-	private string $password;
+	private bool $passwordChanged = false;
 
 	/**
-	 * @var Collection<int, UserVerification> User verifications
+	 * @var string|null Password hash
 	 */
-	#[ORM\OneToMany(mappedBy: 'user', targetEntity: UserVerification::class, cascade: ['persist'], orphanRemoval: true)]
-	private Collection $verifications;
+	#[ORM\Column(type: 'string', length: 255, nullable: true)]
+	private ?string $password;
 
 	/**
 	 * Constructor
 	 * @param string $name User name
 	 * @param string $email User's email
-	 * @param string $password User password
+	 * @param string|null $password User password
 	 * @param UserRole $role User role
 	 * @param UserLanguage $language User language
 	 * @param AccountState $state Account state
@@ -88,7 +106,7 @@ class User implements JsonSerializable {
 		#[ORM\Column(type: 'string', length: 255)]
 		public string $name,
 		string $email,
-		string $password,
+		?string $password,
 		#[ORM\Column(type: 'string', length: 15, enumType: UserRole::class)]
 		public UserRole $role = UserRole::Normal,
 		#[ORM\Column(type: 'string', length: 7, enumType: UserLanguage::class, options: ['default' => UserLanguage::Default])]
@@ -97,24 +115,54 @@ class User implements JsonSerializable {
 		public AccountState $state = AccountState::Default,
 	) {
 		$this->setEmail($email);
-		$this->setPassword($password);
-		$this->verifications = new ArrayCollection();
+		if ($password === null) {
+			$this->password = null;
+		} else {
+			$this->setPassword($password);
+		}
 	}
 
 	/**
 	 * Creates a new user from JSON data
-	 * @param array{name: string, email:string, password: string, role?:string, language?: string} $json JSON data
+	 * @param array{name: string, email:string, password?: string, role?:string, language?: string} $json JSON data
 	 * @return self User entity
 	 */
 	public static function createFromJson(array $json): self {
+		$password = $json['password'] ?? null;
 		return new self(
 			$json['name'],
 			$json['email'],
-			$json['password'],
+			$password,
 			UserRole::tryFrom($json['role']) ?? UserRole::Default,
 			UserLanguage::tryFrom($json['language']) ?? UserLanguage::Default,
-			AccountState::Default,
+			$password === null ? AccountState::Invited : AccountState::Default,
 		);
+	}
+
+	/**
+	 * Edit user from JSON data
+	 * @param array{name: string, email:string, role?:string, language?: string} $json JSON data
+	 * @throws InvalidEmailAddressException Invalid email address
+	 * @throws InvalidUserLanguageException Invalid user language
+	 * @throws InvalidUserRoleException Invalid user role
+	 */
+	public function editFromJson(array $json): void {
+		$this->name = $json['name'];
+		$this->setEmail($json['email']);
+		if (array_key_exists('language', $json)) {
+			try {
+				$this->language = UserLanguage::from($json['language']);
+			} catch (ValueError $e) {
+				throw new InvalidUserLanguageException('Invalid language', previous: $e);
+			}
+		}
+		if (array_key_exists('role', $json)) {
+			try {
+				$this->role = UserRole::from($json['role']);
+			} catch (ValueError $e) {
+				throw new InvalidUserRoleException('Invalid role', previous: $e);
+			}
+		}
 	}
 
 	/**
@@ -158,6 +206,14 @@ class User implements JsonSerializable {
 	}
 
 	/**
+	 * Checks if the user has changed password
+	 * @return bool User has changed password
+	 */
+	public function hasChangedPassword(): bool {
+		return $this->passwordChanged;
+	}
+
+	/**
 	 * Checks if the user has a scope
 	 * @param string $scope Scope
 	 * @return bool User has a scope
@@ -167,25 +223,25 @@ class User implements JsonSerializable {
 	}
 
 	/**
-	 * Returns all e-mail address verification
-	 * @return Collection<int, UserVerification> E-mail address verifications
-	 */
-	public function getVerifications(): Collection {
-		return $this->verifications;
-	}
-
-	/**
 	 * Sets the user's email
 	 * @param string $email User's email
 	 * @throws InvalidEmailAddressException
 	 */
 	public function setEmail(string $email): void {
 		$this->validateEmail($email);
-		if (isset($this->email) && $this->email !== $email && $this->state === AccountState::Verified) {
-			$this->state = AccountState::Unverified;
+		if (isset($this->email) && $this->email !== $email && $this->state->isVerified()) {
+			$this->state = $this->state->unverify();
 			$this->emailChanged = true;
 		}
 		$this->email = $email;
+	}
+
+	/**
+	 * Checks if the user is invited for initial password setup
+	 * @return bool Is the user invited?
+	 */
+	public function isInvited(): bool {
+		return $this->password === null;
 	}
 
 	/**
@@ -197,6 +253,7 @@ class User implements JsonSerializable {
 			throw new InvalidPasswordException('Empty new password.');
 		}
 		$this->password = password_hash($password, PASSWORD_DEFAULT);
+		$this->passwordChanged = true;
 	}
 
 	/**
@@ -205,6 +262,9 @@ class User implements JsonSerializable {
 	 * @return bool Is the password correct?
 	 */
 	public function verifyPassword(string $password): bool {
+		if ($this->password === null) {
+			return false;
+		}
 		return password_verify($password, $this->password);
 	}
 

@@ -28,8 +28,6 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JsonSerializable;
 use Nette\Utils\Strings;
-use Tracy\Debugger;
-use Tracy\Logger;
 
 /**
  * Device entity

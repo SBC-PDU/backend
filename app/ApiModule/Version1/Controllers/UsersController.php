@@ -29,17 +29,18 @@ use Apitte\Core\Exception\Api\ClientErrorException;
 use Apitte\Core\Http\ApiRequest;
 use Apitte\Core\Http\ApiResponse;
 use App\ApiModule\Version1\Models\RestApiSchemaValidator;
+use App\ApiModule\Version1\RequestAttributes;
 use App\ApiModule\Version1\Utils\BaseUrlHelper;
 use App\CoreModule\Models\UserManager;
+use App\Exceptions\ConflictedEmailAddressException;
+use App\Exceptions\InvalidAccountStateException;
 use App\Exceptions\InvalidEmailAddressException;
+use App\Exceptions\InvalidUserLanguageException;
+use App\Exceptions\InvalidUserRoleException;
+use App\Exceptions\ResourceNotFoundException;
 use App\Models\Database\Entities\User;
-use App\Models\Database\EntityManager;
-use App\Models\Database\Enums\UserLanguage;
 use App\Models\Database\Enums\UserRole;
-use App\Models\Database\Repositories\UserRepository;
 use BadMethodCallException;
-use Nette\Mail\SendException;
-use ValueError;
 
 /**
  * User manager API controller
@@ -49,22 +50,14 @@ use ValueError;
 class UsersController extends BaseController {
 
 	/**
-	 * @var UserRepository User database repository
-	 */
-	private readonly UserRepository $repository;
-
-	/**
 	 * Constructor
-	 * @param EntityManager $entityManager Entity manager
 	 * @param UserManager $manager User manager
 	 * @param RestApiSchemaValidator $validator REST API JSON schema validator
 	 */
 	public function __construct(
-		private readonly EntityManager $entityManager,
 		private readonly UserManager $manager,
 		RestApiSchemaValidator $validator,
 	) {
-		$this->repository = $entityManager->getUserRepository();
 		parent::__construct($validator);
 	}
 
@@ -120,24 +113,15 @@ class UsersController extends BaseController {
 		$this->validator->validateRequest('userAdd', $request);
 		$json = $request->getJsonBody();
 		try {
-			if ($this->manager->checkEmailUniqueness($json['email'])) {
-				throw new ClientErrorException('E-main address is already used', ApiResponse::S409_CONFLICT);
-			}
 			$user = User::createFromJson($json);
-			$this->manager->create($user);
+			$this->manager->create($user, $baseUrl);
 		} catch (InvalidEmailAddressException $e) {
 			throw new ClientErrorException('Invalid email address: ' . $e->getMessage(), ApiResponse::S400_BAD_REQUEST, $e);
-		}
-		$responseBody = ['emailSent' => false];
-		try {
-			$this->manager->sendVerificationEmail($user, $baseUrl);
-			$responseBody['emailSent'] = true;
-		} catch (SendException $e) {
-			// Ignore failure
+		} catch (ConflictedEmailAddressException) {
+			throw new ClientErrorException('E-main address is already used', ApiResponse::S409_CONFLICT);
 		}
 		return $response->withStatus(ApiResponse::S201_CREATED)
-			->withHeader('Location', '/v1/users/' . $user->getId())
-			->writeJsonBody($responseBody);
+			->withHeader('Location', '/v1/users/' . $user->getId());
 	}
 
 	#[Path('/{id}')]
@@ -215,41 +199,24 @@ class UsersController extends BaseController {
 		$user = $this->getUser($request);
 		$this->validator->validateRequest('userEdit', $request);
 		$json = $request->getJsonBody();
-		$user->name = $json['name'];
-		$email = $json['email'];
-		if ($this->manager->checkEmailUniqueness($email, $user->getId())) {
+		try {
+			if (($user->role === UserRole::Admin) &&
+				$this->manager->hasOnlySingleAdmin() &&
+				($json['role'] !== UserRole::Admin->value)) {
+				throw new ClientErrorException('Admin user role change forbidden for the only admin user', ApiResponse::S409_CONFLICT);
+			}
+			$user->editFromJson($json);
+			$this->manager->edit($user, $baseUrl);
+			return $response->withStatus(ApiResponse::S200_OK);
+		} catch (InvalidEmailAddressException $e) {
+			throw new ClientErrorException($e->getMessage(), ApiResponse::S400_BAD_REQUEST);
+		} catch (InvalidUserLanguageException) {
+			throw new ClientErrorException('Invalid language', ApiResponse::S400_BAD_REQUEST);
+		} catch (InvalidUserRoleException) {
+			throw new ClientErrorException('Invalid role', ApiResponse::S400_BAD_REQUEST);
+		} catch (ConflictedEmailAddressException) {
 			throw new ClientErrorException('E-mail address is already used', ApiResponse::S409_CONFLICT);
 		}
-		try {
-			$user->setEmail($email);
-		} catch (InvalidEmailAddressException $e) {
-			throw new ClientErrorException($e->getMessage(), ApiResponse::S400_BAD_REQUEST, $e);
-		}
-		if (($user->role === UserRole::Admin) &&
-			($this->repository->userCountByRole(UserRole::Admin) === 1) &&
-			($json['role'] !== UserRole::Admin->value)) {
-				throw new ClientErrorException('Admin user role change forbidden for the only admin user', ApiResponse::S409_CONFLICT);
-		}
-		try {
-			$user->role = UserRole::from($json['role']);
-		} catch (ValueError $e) {
-			throw new ClientErrorException('Invalid role', ApiResponse::S400_BAD_REQUEST, $e);
-		}
-		try {
-			$user->language = UserLanguage::from($json['language']);
-		} catch (ValueError $e) {
-			throw new ClientErrorException('Invalid language', ApiResponse::S400_BAD_REQUEST, $e);
-		}
-		$this->entityManager->persist($user);
-		if ($user->hasChangedEmail()) {
-			try {
-				$this->manager->sendVerificationEmail($user, $baseUrl);
-			} catch (SendException $e) {
-				// Ignore failure
-			}
-		}
-		$this->entityManager->flush();
-		return $response->withStatus(ApiResponse::S200_OK);
 	}
 
 	#[Path('/{id}/block')]
@@ -269,9 +236,14 @@ class UsersController extends BaseController {
 	public function block(ApiRequest $request, ApiResponse $response): ApiResponse {
 		self::checkScopes($request, ['admin']);
 		try {
-			$this->manager->block($this->getUser($request));
+			$user = $this->getUser($request);
+			$currentUser = $request->getAttribute(RequestAttributes::AppLoggedUser);
+			if ($currentUser instanceof User && $currentUser->getId() === $user->getId()) {
+				throw new ClientErrorException('User cannot block itself', ApiResponse::S400_BAD_REQUEST);
+			}
+			$this->manager->block($user);
 			return $response->withStatus(ApiResponse::S200_OK);
-		} catch (BadMethodCallException $e) {
+		} catch (InvalidAccountStateException $e) {
 			throw new ClientErrorException('User is already blocked', ApiResponse::S409_CONFLICT, $e);
 		}
 	}
@@ -295,7 +267,7 @@ class UsersController extends BaseController {
 		try {
 			$this->manager->unblock($this->getUser($request));
 			return $response->withStatus(ApiResponse::S200_OK);
-		} catch (BadMethodCallException $e) {
+		} catch (InvalidAccountStateException $e) {
 			throw new ClientErrorException('User is not blocked', ApiResponse::S409_CONFLICT, $e);
 		}
 	}
@@ -308,11 +280,11 @@ class UsersController extends BaseController {
 	 */
 	private function getUser(ApiRequest $request): User {
 		$id = (int) $request->getParameter('id');
-		$user = $this->repository->find($id);
-		if (!$user instanceof User) {
-			throw new ClientErrorException('User not found', ApiResponse::S404_NOT_FOUND);
+		try {
+			return $this->manager->getById($id);
+		} catch (ResourceNotFoundException $e) {
+			throw new ClientErrorException('User not found', ApiResponse::S404_NOT_FOUND, $e);
 		}
-		return $user;
 	}
 
 }

@@ -20,6 +20,8 @@ declare(strict_types = 1);
 
 namespace App\Models\Database\Enums;
 
+use App\Exceptions\InvalidAccountStateException;
+
 /**
  * Account state enum
  */
@@ -37,6 +39,10 @@ enum AccountState: int {
 
 	/// Blocked verified account
 	case BlockedVerified = 3;
+	/// Invited account
+	case Invited = 4;
+	/// Blocked invited account
+	case BlockedInvited = 5;
 
 	/// Default account state
 	public const Default = self::Unverified;
@@ -49,7 +55,10 @@ enum AccountState: int {
 		return match ($this) {
 			self::Unverified => 'unverified',
 			self::Verified => 'verified',
-			self::BlockedUnverified, self::BlockedVerified => 'blocked',
+			self::Invited => 'invited',
+			self::BlockedUnverified,
+			self::BlockedVerified,
+			self::BlockedInvited => 'blocked',
 		};
 	}
 
@@ -58,7 +67,80 @@ enum AccountState: int {
 	 * @return bool In the account blocked?
 	 */
 	public function isBlocked(): bool {
-		return in_array($this, [self::BlockedUnverified, self::BlockedVerified], true);
+		$blockedStates = [
+			self::BlockedUnverified,
+			self::BlockedVerified,
+			self::BlockedInvited,
+		];
+		return in_array($this, $blockedStates, true);
+	}
+
+	/**
+	 * Checks if the account is verified
+	 * @return bool Is the account verified?
+	 */
+	public function isVerified(): bool {
+		return $this === self::Verified || $this === self::BlockedVerified;
+	}
+
+	/**
+	 * Checks if the account is unverified
+	 * @return bool Is the account unverified?
+	 */
+	public function isUnverified(): bool {
+		return $this === self::Unverified || $this === self::BlockedUnverified;
+	}
+
+	/**
+	 * Returns blocked account state based on the current state
+	 * @return self Blocked account state
+	 * @throws InvalidAccountStateException User is already blocked
+	 */
+	public function block(): self {
+		return match ($this) {
+			self::Unverified => self::BlockedUnverified,
+			self::Verified => self::BlockedVerified,
+			self::Invited => self::BlockedInvited,
+			default => throw new InvalidAccountStateException(),
+		};
+	}
+
+	/**
+	 * Returns unblocked account state based on the current blocked state
+	 * @return self Unblocked account state
+	 * @throws InvalidAccountStateException User is already unblocked
+	 */
+	public function unblock(): self {
+		return match ($this) {
+			self::BlockedUnverified => self::Unverified,
+			self::BlockedVerified => self::Verified,
+			self::BlockedInvited => self::Invited,
+			default => throw new InvalidAccountStateException('User is already unblocked'),
+		};
+	}
+
+	/**
+	 * Returns verified account state based on the current state
+	 * @return self Verified account state
+	 */
+	public function verify(): self {
+		return match ($this) {
+			self::Unverified, self::Invited => self::Verified,
+			self::BlockedUnverified, self::BlockedInvited => self::BlockedVerified,
+			default => throw new InvalidAccountStateException('User is already verified'),
+		};
+	}
+
+	/**
+	 * Returns unverified account state based on the current state
+	 * @return self Unverified account state
+	 */
+	public function unverify(): self {
+		return match ($this) {
+			self::Verified => self::Unverified,
+			self::BlockedVerified => self::BlockedUnverified,
+			default => throw new InvalidAccountStateException('User is already unverified'),
+		};
 	}
 
 }

@@ -20,6 +20,7 @@ declare(strict_types = 1);
 
 namespace App\Models\Database\Repositories;
 
+use App\Exceptions\ResourceNotFoundException;
 use App\Models\Database\Entities\PasswordRecovery;
 use Doctrine\ORM\EntityRepository;
 
@@ -36,6 +37,20 @@ class PasswordRecoveryRepository extends EntityRepository {
 	 */
 	public function findOneByUuid(string $uuid): ?PasswordRecovery {
 		return $this->findOneBy(['uuid' => $uuid]);
+	}
+
+	/**
+	 * Returns the password recovery by UUID
+	 * @param string $uuid Password recovery UUID
+	 * @return PasswordRecovery Password recovery entity
+	 * @throws ResourceNotFoundException Password recovery not found
+	 */
+	public function getByUuid(string $uuid): PasswordRecovery {
+		$passwordRecovery = $this->findOneByUuid($uuid);
+		if (!$passwordRecovery instanceof PasswordRecovery) {
+			throw new ResourceNotFoundException('Password recovery not found');
+		}
+		return $passwordRecovery;
 	}
 
 }

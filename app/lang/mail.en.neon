@@ -26,6 +26,10 @@ emailVerification:
 	title: Email address verification
 	body: 'in order to complete your user profile at SBC PDU management, you need to verify your e-mail address by clicking on the link bellow.'
 
+passwordChanged:
+	title: 'Password changed'
+	body: 'The password for your has been changed. We are notifying you so you can ensure this change is from a trusted user.'
+
 passwordRecovery:
 	title: Password recovery
 	body: 'a password reset was requested for your account. To reset your password, click the link below. Please note that this link will expire in 24 hours. If you did not issue a password reset request, you may ignore this email.'

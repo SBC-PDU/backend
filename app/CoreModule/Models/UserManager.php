@@ -21,15 +21,19 @@ declare(strict_types = 1);
 namespace App\CoreModule\Models;
 
 use App\ApiModule\Version1\Models\JwtConfigurator;
+use App\Exceptions\BlockedAccountException;
+use App\Exceptions\ConflictedEmailAddressException;
+use App\Exceptions\InvalidAccountStateException;
+use App\Exceptions\ResourceExpiredException;
+use App\Exceptions\ResourceNotFoundException;
 use App\Models\Database\Entities\PasswordRecovery;
 use App\Models\Database\Entities\User;
+use App\Models\Database\Entities\UserInvitation;
 use App\Models\Database\Entities\UserVerification;
 use App\Models\Database\EntityManager;
-use App\Models\Database\Enums\AccountState;
 use App\Models\Database\Enums\UserRole;
 use App\Models\Database\Repositories\UserRepository;
-use App\Models\Mail\Senders\EmailVerificationMailSender;
-use App\Models\Mail\Senders\PasswordRecoveryMailSender;
+use App\Models\Mail\Senders\UserMailSender;
 use BadMethodCallException;
 use DateTimeImmutable;
 use Nette\Mail\SendException;
@@ -47,13 +51,13 @@ class UserManager {
 	/**
 	 * Constructor
 	 * @param EntityManager $entityManager Entity manager
-	 * @param EmailVerificationMailSender $emailVerificationSender Email verification sender
+	 * @param JwtConfigurator $jwtConfigurator JWT configurator
+	 * @param UserMailSender $mailSender User mail sender
 	 */
 	public function __construct(
 		private readonly EntityManager $entityManager,
 		private readonly JwtConfigurator $jwtConfigurator,
-		private readonly EmailVerificationMailSender $emailVerificationSender,
-		private readonly PasswordRecoveryMailSender $passwordRecoverySender,
+		private readonly UserMailSender $mailSender,
 	) {
 		$this->repository = $entityManager->getUserRepository();
 	}
@@ -72,10 +76,24 @@ class UserManager {
 	/**
 	 * Creates a new user
 	 * @param User $user User to be created
+	 * @param string $baseUrl Frontend base URL
+	 * @throws ConflictedEmailAddressException E-mail address is already used
 	 */
-	public function create(User $user): void {
+	public function create(User $user, string $baseUrl): void {
+		if ($this->checkEmailUniqueness($user->getEmail())) {
+			throw new ConflictedEmailAddressException('E-main address is already used');
+		}
 		$this->entityManager->persist($user);
 		$this->entityManager->flush();
+		try {
+			if ($user->isInvited()) {
+				$this->sendInvitationEmail($user, $baseUrl);
+			} else {
+				$this->sendVerificationEmail($user, $baseUrl);
+			}
+		} catch (SendException) {
+			// Ignore
+		}
 	}
 
 	/**
@@ -105,12 +123,16 @@ class UserManager {
 	 * @throws SendException Failed to send e-mail message
 	 */
 	public function createPasswordRecoveryRequest(User $user, string $baseUrl): void {
-		if ($user->state !== AccountState::Verified) {
+		if (!$user->state->isVerified()) {
 			throw new BadMethodCallException('E-mail address is not verified');
 		}
+		if ($user->passwordRecovery !== null) {
+			$this->entityManager->remove($user->passwordRecovery);
+		}
 		$recovery = new PasswordRecovery($user);
-		$this->entityManager->persist($recovery);
-		$this->passwordRecoverySender->send($recovery, $baseUrl);
+		$user->passwordRecovery = $recovery;
+		$this->entityManager->persist($user);
+		$this->mailSender->sendPasswordRecovery($recovery, $baseUrl);
 		$this->entityManager->flush();
 	}
 
@@ -119,11 +141,38 @@ class UserManager {
 	 * @param User $user User to delete
 	 */
 	public function delete(User $user): void {
-		if (($user->role === UserRole::Admin) &&
-			($this->repository->userCountByRole(UserRole::Admin) === 1)) {
+		if (($user->role === UserRole::Admin) && $this->hasOnlySingleAdmin()) {
 			throw new BadMethodCallException('Admin user deletion forbidden for the only admin user');
 		}
 		$this->entityManager->remove($user);
+		$this->entityManager->flush();
+	}
+
+	/**
+	 * Edits an user
+	 * @param User $user Edited user
+	 * @param string $baseUrl Frontend base URL
+	 * @throws ConflictedEmailAddressException E-mail address is already used
+	 */
+	public function edit(User $user, string $baseUrl): void {
+		if ($this->checkEmailUniqueness($user->getEmail(), $user->getId())) {
+			throw new ConflictedEmailAddressException('E-main address is already used');
+		}
+		$this->entityManager->persist($user);
+		if ($user->hasChangedEmail()) {
+			try {
+				$this->sendVerificationEmail($user, $baseUrl);
+			} catch (SendException) {
+				// Ignore
+			}
+		}
+		if ($user->hasChangedPassword()) {
+			try {
+				$this->mailSender->sendPasswordChanged($user);
+			} catch (SendException) {
+				// Ignore
+			}
+		}
 		$this->entityManager->flush();
 	}
 
@@ -134,6 +183,34 @@ class UserManager {
 	 */
 	public function findByEmail(string $email): ?User {
 		return $this->repository->findOneByEmail($email);
+	}
+
+	/**
+	 * Returns user by e-mail address
+	 * @param string $email E-mail address
+	 * @return User User
+	 * @throws ResourceNotFoundException User not found
+	 */
+	public function getByEmail(string $email): User {
+		return $this->repository->getByEmail($email);
+	}
+
+	/**
+	 * Returns user by ID
+	 * @param int $id User ID
+	 * @return User User
+	 * @throws ResourceNotFoundException User not found
+	 */
+	public function getById(int $id): User {
+		return $this->repository->getById($id);
+	}
+
+	/**
+	 * Checks if there is only a single admin user
+	 * @return bool True if there is only a single admin user
+	 */
+	public function hasOnlySingleAdmin(): bool {
+		return $this->repository->userCountByRole(UserRole::Admin) === 1;
 	}
 
 	/**
@@ -149,12 +226,10 @@ class UserManager {
 	/**
 	 * Blocks user
 	 * @param User $user User to block
+	 * @throws InvalidAccountStateException User is already blocked
 	 */
 	public function block(User $user): void {
-		if ($user->state->isBlocked()) {
-			throw new BadMethodCallException('User is already blocked');
-		}
-		$user->state = $user->state === AccountState::Unverified ? AccountState::BlockedUnverified : AccountState::BlockedVerified;
+		$user->state = $user->state->block();
 		$this->entityManager->persist($user);
 		$this->entityManager->flush();
 	}
@@ -162,27 +237,80 @@ class UserManager {
 	/**
 	 * Unblocks user
 	 * @param User $user User to unblock
+	 * @throws InvalidAccountStateException User is already unblocked
 	 */
 	public function unblock(User $user): void {
-		if (!$user->state->isBlocked()) {
-			throw new BadMethodCallException('User is not blocked');
-		}
-		$user->state = $user->state === AccountState::BlockedUnverified ? AccountState::Unverified : AccountState::Verified;
+		$user->state = $user->state->unblock();
 		$this->entityManager->persist($user);
 		$this->entityManager->flush();
+	}
+
+	/**
+	 * Verifies user's e-mail address
+	 * @param UserVerification $verification Verification
+	 * @throws InvalidAccountStateException User is already verified
+	 * @throws ResourceExpiredException Verification expired
+	 * @throws BlockedAccountException User is blocked
+	 */
+	public function verify(UserVerification $verification, string $baseUrl): void {
+		$user = $verification->user;
+		if ($user->state->isVerified()) {
+			throw new InvalidAccountStateException('User is already verified');
+		}
+		if ($verification->isExpired()) {
+			try {
+				$this->sendVerificationEmail($user, $baseUrl);
+			} catch (SendException) {
+				// Ignore failure
+			}
+			throw new ResourceExpiredException('Verification link expired');
+		}
+		$user->state = $user->state->verify();
+		$this->entityManager->persist($user);
+		$this->entityManager->flush();
+		if ($user->state->isBlocked()) {
+			throw new BlockedAccountException('User is blocked');
+		}
+	}
+
+	/**
+	 * Sends user invitation e-mail
+	 * @param User $user User
+	 * @param string $baseUrl Frontend base URL
+	 * @throws SendException
+	 */
+	public function sendInvitationEmail(User $user, string $baseUrl): void {
+		$repository = $this->entityManager->getUserInvitationRepository();
+		$currentInvitation = $repository->findOneBy(['user' => $user]);
+		if ($currentInvitation instanceof UserInvitation) {
+			$this->entityManager->remove($currentInvitation);
+		}
+		$invitation = new UserInvitation($user);
+		$user->invitation = $invitation;
+		$this->entityManager->persist($user);
+		$this->entityManager->flush();
+		$this->mailSender->sendPasswordSet($invitation, $baseUrl);
 	}
 
 	/**
 	 * Sends user verification e-mail
 	 * @param User $user User
 	 * @param string $baseUrl Frontend base URL
-	 * @throws SendException
+	 * @throws InvalidAccountStateException User is already verified
+	 * @throws SendException Failed to send e-mail message
 	 */
 	public function sendVerificationEmail(User $user, string $baseUrl): void {
+		if ($user->state->isVerified()) {
+			throw new InvalidAccountStateException('User is already verified');
+		}
+		if ($user->verification instanceof UserVerification) {
+			$this->entityManager->remove($user->verification);
+		}
 		$verification = new UserVerification($user);
-		$this->entityManager->persist($verification);
+		$user->verification = $verification;
+		$this->entityManager->persist($user);
 		$this->entityManager->flush();
-		$this->emailVerificationSender->send($verification, $baseUrl);
+		$this->mailSender->sendVerification($verification, $baseUrl);
 	}
 
 }

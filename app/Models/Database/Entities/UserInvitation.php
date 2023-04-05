@@ -22,7 +22,7 @@ namespace App\Models\Database\Entities;
 
 use App\Models\Database\Attributes\TCreatedAt;
 use App\Models\Database\Attributes\TUuid;
-use App\Models\Database\Repositories\UserVerificationRepository;
+use App\Models\Database\Repositories\UserInvitationRepository;
 use DateInterval;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
@@ -30,10 +30,10 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * User verification
  */
-#[ORM\Entity(repositoryClass: UserVerificationRepository::class)]
-#[ORM\Table(name: 'email_verification')]
+#[ORM\Entity(repositoryClass: UserInvitationRepository::class)]
+#[ORM\Table(name: 'user_invitations')]
 #[ORM\HasLifecycleCallbacks]
-class UserVerification {
+class UserInvitation {
 
 	use TUuid;
 	use TCreatedAt;
@@ -50,11 +50,11 @@ class UserVerification {
 	}
 
 	/**
-	 * Checks if the account verification is expired
-	 * @return bool Is the account verification expired?
+	 * Checks if the user invitation is expired
+	 * @return bool Is the user invitation expired?
 	 */
 	public function isExpired(): bool {
-		$expirationInterval = new DateInterval('P1D');
+		$expirationInterval = new DateInterval('P7D');
 		$expiration = DateTimeImmutable::createFromMutable($this->createdAt)
 			->add($expirationInterval);
 		$now = new DateTimeImmutable();

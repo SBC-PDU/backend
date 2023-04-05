@@ -7,7 +7,6 @@
 	"required": [
 		"name",
 		"email",
-		"password",
 		"language",
 		"role"
 	],

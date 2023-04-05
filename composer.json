@@ -57,7 +57,8 @@
 		"php-mqtt/client": "^v1.8.0",
 		"ramsey/uuid": "^4.7.3",
 		"ramsey/uuid-doctrine": "^2.0.0",
-		"tracy/tracy": "^v2.10.0"
+		"tracy/tracy": "^v2.10.0",
+		"web-auth/webauthn-lib": "^4.5"
 	},
 	"require-dev": {
 		"contributte/qa": "^v0.3.0",
@@ -74,7 +75,8 @@
 	},
 	"autoload": {
 		"psr-4": {
-			"App\\": "app"
+			"App\\": "app",
+			"Database\\": "db"
 		}
 	},
 	"autoload-dev": {

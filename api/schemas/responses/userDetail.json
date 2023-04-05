@@ -60,7 +60,9 @@
 			"title": "Account state",
 			"enum": [
 				"unverified",
-				"verified"
+				"verified",
+				"blocked",
+				"invited"
 			],
 			"example": "verified"
 		}

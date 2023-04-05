@@ -18,25 +18,13 @@ declare(strict_types = 1);
  * limitations under the License.
  */
 
-namespace App\Models\Mail\Senders;
+namespace App\Exceptions;
 
-use App\Models\Database\Entities\PasswordRecovery;
+use RuntimeException;
 
 /**
- * Password recovery request mail sender
+ * The exception that indicates an unverified email address
  */
-class PasswordRecoveryMailSender extends BaseMailSender {
-
-	/**
-	 * Sends forgotten password recovery e-mail
-	 * @param PasswordRecovery $recovery Forgotten password recovery request
-	 * @param string $baseUrl Base URL
-	 */
-	public function send(PasswordRecovery $recovery, string $baseUrl = ''): void {
-		$params = [
-			'url' => $baseUrl . '/auth/password/reset/' . $recovery->getUuid(),
-		];
-		$this->sendMessage('passwordRecovery.latte', $params, $recovery->user);
-	}
+class UnverifiedEmailAddressException extends RuntimeException {
 
 }

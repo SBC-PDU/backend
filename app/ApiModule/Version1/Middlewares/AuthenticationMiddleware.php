@@ -106,6 +106,9 @@ class AuthenticationMiddleware implements IMiddleware {
 			return $this->createUnauthorizedResponse($response, 'Client authentication failed');
 		}
 		if ($identity instanceof User) {
+			if ($identity->state->isBlocked()) {
+				return $this->createUnauthorizedResponse($response, 'Account is blocked');
+			}
 			// Add info about current logged user to request attributes
 			$request = $request->withAttribute(RequestAttributes::AppLoggedUser, $identity);
 		}

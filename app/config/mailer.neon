@@ -13,8 +13,7 @@
 # limitations under the License.
 
 services:
-	- App\Models\Mail\Senders\EmailVerificationMailSender
-	- App\Models\Mail\Senders\PasswordRecoveryMailSender
+	- App\Models\Mail\Senders\UserMailSender
 
 mail:
 	smtp: true

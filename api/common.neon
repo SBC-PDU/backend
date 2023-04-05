@@ -71,10 +71,12 @@ components:
 			$ref: https://sbc-pdu.romanondracek.cz/apiSchemas/responses/error.json
 		OpenApiSpecification:
 			$ref: https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/schemas/v3.0/schema.json
-		PasswordReset:
-			$ref: https://sbc-pdu.romanondracek.cz/apiSchemas/requests/passwordReset.json
 		PasswordRecovery:
 			$ref: https://sbc-pdu.romanondracek.cz/apiSchemas/requests/passwordRecovery.json
+		PasswordReset:
+			$ref: https://sbc-pdu.romanondracek.cz/apiSchemas/requests/passwordReset.json
+		PasswordSet:
+			$ref: https://sbc-pdu.romanondracek.cz/apiSchemas/requests/passwordSet.json
 		UserAdd:
 			$ref: https://sbc-pdu.romanondracek.cz/apiSchemas/requests/userAdd.json
 		UserDetail:
