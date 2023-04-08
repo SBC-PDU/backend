@@ -1,0 +1,21 @@
+{
+	"title": "Správce napájecích jednotek",
+	"greeting": "Vážený uživateli %username%,",
+	"footer": "S pozdravem\nRoman Ondráček",
+	"accountVerification": {
+		"title": "Ověření účtu",
+		"body": "pro dokončení registrace ve správci napájecích jednotek klikněte na níže uvedený odkaz. Platnost odkazu je 7 dní."
+	},
+	"passwordChanged": {
+		"title": "Změna hesla",
+		"body": "heslo pro Váš účet bylo změněno. Informujeme Vás, abyste se mohli ujistit, že změnu provedl oprávněý uživatel."
+	},
+	"passwordRecovery": {
+		"title": "Obnova hesla",
+		"body": "bylo požádáno o obnovení hesla k Vašemu uživatelkému účtu. Chcete-li obnovit heslo, klikněte na níže uvedený odkaz. Platnost odkazu je 24 hodin. Pokud jste o obnovení hesla nežádali, tento email ignorujte."
+	},
+	"passwordSet": {
+		"title": "Nastavení hesla pro Váš nový účet",
+		"body": "byl Vám administrátorem vytvořen účet do správce napájecích jednotek. Chcete-li si nastavit heslo, klikněte na níže uvedený odkaz. Platnost odkazu je 24 hodin."
+	}
+}

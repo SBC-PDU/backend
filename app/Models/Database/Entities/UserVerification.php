@@ -54,7 +54,7 @@ class UserVerification {
 	 * @return bool Is the account verification expired?
 	 */
 	public function isExpired(): bool {
-		$expirationInterval = new DateInterval('P1D');
+		$expirationInterval = new DateInterval('P7D');
 		$expiration = DateTimeImmutable::createFromMutable($this->createdAt)
 			->add($expirationInterval);
 		$now = new DateTimeImmutable();

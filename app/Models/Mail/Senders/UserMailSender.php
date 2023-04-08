@@ -42,7 +42,7 @@ class UserMailSender extends BaseMailSender {
 		$params = [
 			'url' => $baseUrl . '/account/verification/' . $verification->getUuid()->toString(),
 		];
-		$this->sendMessage('emailVerification.latte', $params, $user);
+		$this->sendMessage('accountVerification.latte', $params, $user);
 	}
 
 	/**

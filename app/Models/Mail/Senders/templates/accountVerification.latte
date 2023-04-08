@@ -15,10 +15,10 @@
  *}
 {varType string $url}
 {layout '@layout.latte'}
-{block title}{_mail.emailVerification.title}{/block}
+{block title}{_mail.accountVerification.title}{/block}
 {block body}
 	<p>
-		{_mail.emailVerification.body|breakLines}<br>
+		{_mail.accountVerification.body|breakLines}<br>
 		<a href="{$url}">{$url}</a>
 	</p>
 {/block}

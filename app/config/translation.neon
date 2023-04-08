@@ -16,6 +16,8 @@ extensions:
 	translation: Contributte\Translation\DI\TranslationExtension
 
 translation:
+	loaders:
+		json: Symfony\Component\Translation\Loader\JsonFileLoader
 	locales:
 		whitelist: [cs, en]
 		default: en
