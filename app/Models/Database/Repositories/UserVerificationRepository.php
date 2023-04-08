@@ -21,6 +21,7 @@ declare(strict_types = 1);
 namespace App\Models\Database\Repositories;
 
 use App\Exceptions\ResourceNotFoundException;
+use App\Models\Database\Entities\User;
 use App\Models\Database\Entities\UserVerification;
 use Doctrine\ORM\EntityRepository;
 
@@ -29,6 +30,15 @@ use Doctrine\ORM\EntityRepository;
  * @extends EntityRepository<UserVerification>
  */
 class UserVerificationRepository extends EntityRepository {
+
+	/**
+	 * Finds the verification by user
+	 * @param User $user User
+	 * @return array<UserVerification> User verification entities
+	 */
+	public function findByUser(User $user): array {
+		return $this->findBy(['user' => $user->getId()]);
+	}
 
 	/**
 	 * Finds the verification by UUID

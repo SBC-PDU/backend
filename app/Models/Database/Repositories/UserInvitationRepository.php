@@ -21,6 +21,7 @@ declare(strict_types = 1);
 namespace App\Models\Database\Repositories;
 
 use App\Exceptions\ResourceNotFoundException;
+use App\Models\Database\Entities\User;
 use App\Models\Database\Entities\UserInvitation;
 use Doctrine\ORM\EntityRepository;
 
@@ -29,6 +30,15 @@ use Doctrine\ORM\EntityRepository;
  * @extends EntityRepository<UserInvitation>
  */
 class UserInvitationRepository extends EntityRepository {
+
+	/**
+	 * Finds the invitation by user
+	 * @param User $user User
+	 * @return array<UserInvitation> User invitation entities
+	 */
+	public function findByUser(User $user): array {
+		return $this->findBy(['user' => $user->getId()]);
+	}
 
 	/**
 	 * Finds the invitation by UUID

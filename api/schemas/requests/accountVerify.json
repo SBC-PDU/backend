@@ -1,0 +1,15 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema",
+	"$id": "https://sbc-pdu.romanondracek.cz/apiSchemas/requests/accountVerify.json",
+	"type": "object",
+	"title": "Verify user account",
+	"properties": {
+		"baseUrl": {
+			"$id": "#/properties/baseUrl",
+			"type": "string",
+			"format": "url",
+			"title": "Frontend base URL",
+			"example": "http://localhost/"
+		}
+	}
+}

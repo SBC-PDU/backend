@@ -64,7 +64,7 @@ class SignController extends AuthenticationController {
 	')]
 	public function signIn(ApiRequest $request, ApiResponse $response): ApiResponse {
 		$this->validator->validateRequest('userSignIn', $request);
-		$credentials = $request->getJsonBody();
+		$credentials = $request->getJsonBodyCopy();
 		$user = $this->userManager->findByEmail($credentials['email']);
 		if (!$user instanceof User ||
 			!$user->verifyPassword($credentials['password'])

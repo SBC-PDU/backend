@@ -108,10 +108,10 @@ class UsersController extends BaseController {
 				description: E-mail address is already used
 	')]
 	public function create(ApiRequest $request, ApiResponse $response): ApiResponse {
-		$baseUrl = BaseUrlHelper::get($request);
 		self::checkScopes($request, ['admin']);
 		$this->validator->validateRequest('userAdd', $request);
-		$json = $request->getJsonBody();
+		$baseUrl = BaseUrlHelper::get($request);
+		$json = $request->getJsonBodyCopy();
 		try {
 			$user = User::createFromJson($json);
 			$this->manager->create($user, $baseUrl);
@@ -158,6 +158,8 @@ class UsersController extends BaseController {
 				$ref: "#/components/responses/Forbidden"
 			"404":
 				description: Not found
+			"409":
+				description: Admin user deletion forbidden for the single admin user
 	')]
 	#[RequestParameter(name: 'id', type: 'integer', description: 'User ID')]
 	public function delete(ApiRequest $request, ApiResponse $response): ApiResponse {
@@ -165,7 +167,7 @@ class UsersController extends BaseController {
 		try {
 			$this->manager->delete($this->getUser($request));
 		} catch (BadMethodCallException $e) {
-			throw new ClientErrorException('Admin user deletion forbidden for the only admin user', ApiResponse::S409_CONFLICT);
+			throw new ClientErrorException('Admin user deletion forbidden for the single admin user', ApiResponse::S409_CONFLICT);
 		}
 		return $response->withStatus(ApiResponse::S200_OK);
 	}
@@ -195,10 +197,10 @@ class UsersController extends BaseController {
 	#[RequestParameter(name: 'id', type: 'integer', description: 'User ID')]
 	public function edit(ApiRequest $request, ApiResponse $response): ApiResponse {
 		self::checkScopes($request, ['admin']);
+		$this->validator->validateRequest('userEdit', $request);
 		$baseUrl = BaseUrlHelper::get($request);
 		$user = $this->getUser($request);
-		$this->validator->validateRequest('userEdit', $request);
-		$json = $request->getJsonBody();
+		$json = $request->getJsonBodyCopy();
 		try {
 			if (($user->role === UserRole::Admin) &&
 				$this->manager->hasOnlySingleAdmin() &&

@@ -65,7 +65,7 @@ class PasswordController extends AuthenticationController {
 	public function requestRecovery(ApiRequest $request, ApiResponse $response): ApiResponse {
 		$baseUrl = BaseUrlHelper::get($request);
 		$this->validator->validateRequest('passwordRecovery', $request);
-		$body = $request->getJsonBody();
+		$body = $request->getJsonBodyCopy();
 		try {
 			$user = $this->userManager->getByEmail($body['email']);
 			$this->userManager->createPasswordRecoveryRequest($user, $baseUrl);
@@ -104,7 +104,7 @@ class PasswordController extends AuthenticationController {
 	#[RequestParameter(name: 'uuid', type: 'integer', description: 'Password recovery request UUID')]
 	public function recover(ApiRequest $request, ApiResponse $response): ApiResponse {
 		$this->validator->validateRequest('passwordReset', $request);
-		$body = $request->getJsonBody();
+		$body = $request->getJsonBodyCopy();
 		try {
 			$recoveryRequest = $this->entityManager->getPasswordRecoveryRepository()
 				->getByUuid($request->getParameter('uuid'));
@@ -114,9 +114,8 @@ class PasswordController extends AuthenticationController {
 				throw new ClientErrorException('Password recovery request is expired', ApiResponse::S410_GONE);
 			}
 			$user = $recoveryRequest->user;
-			$user->passwordRecovery = null;
 			$user->setPassword($body['password']);
-			$this->entityManager->persist($user);
+			$this->entityManager->remove($user->passwordRecovery);
 			$this->entityManager->flush();
 			return $this->createSignedInResponse($response, $user);
 		} catch (ResourceNotFoundException) {
@@ -151,7 +150,7 @@ class PasswordController extends AuthenticationController {
 	#[RequestParameter(name: 'uuid', type: 'integer', description: 'Password set UUID')]
 	public function set(ApiRequest $request, ApiResponse $response): ApiResponse {
 		$this->validator->validateRequest('passwordSet', $request);
-		$body = $request->getJsonBody();
+		$body = $request->getJsonBodyCopy();
 		try {
 			$userInvitation = $this->entityManager->getUserInvitationRepository()
 				->getByUuid($request->getParameter('uuid'));

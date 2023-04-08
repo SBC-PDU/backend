@@ -95,7 +95,7 @@ class DeviceController extends BaseController {
 	')]
 	public function add(ApiRequest $request, ApiResponse $response): ApiResponse {
 		$this->validator->validateRequest('deviceAdd', $request);
-		$json = $request->getJsonBody();
+		$json = $request->getJsonBodyCopy();
 		$json['id'] = str_replace([':', '.', '-'], '', strtolower($json['macAddress']));
 		$device = Device::createFromJson($json);
 		try {
@@ -157,7 +157,7 @@ class DeviceController extends BaseController {
 	#[RequestParameter(name: 'deviceId', type: 'string', description: 'Device ID')]
 	public function edit(ApiRequest $request, ApiResponse $response): ApiResponse {
 		$this->validator->validateRequest('deviceModify', $request);
-		$json = $request->getJsonBody();
+		$json = $request->getJsonBodyCopy();
 		$device = $this->getDevice($request);
 		$device->editFromJson($json);
 		$this->deviceManager->edit($device);
@@ -195,7 +195,7 @@ class DeviceController extends BaseController {
 	public function switch(ApiRequest $request, ApiResponse $response): ApiResponse {
 		$device = $this->getDevice($request);
 		$outputId = $request->getParameter('outputId');
-		$state = $request->getJsonBody()['enabled'] === true;
+		$state = $request->getJsonBodyCopy()['enabled'] === true;
 		try {
 			$this->deviceManager->switchOutput($device, (int) $outputId, $state);
 		} catch (ValueError $error) {

@@ -31,7 +31,7 @@ use Doctrine\ORM\Mapping as ORM;
  * User verification
  */
 #[ORM\Entity(repositoryClass: UserVerificationRepository::class)]
-#[ORM\Table(name: 'email_verification')]
+#[ORM\Table(name: 'user_verification')]
 #[ORM\HasLifecycleCallbacks]
 class UserVerification {
 
@@ -43,8 +43,8 @@ class UserVerification {
 	 * @param User $user User
 	 */
 	public function __construct(
-		#[ORM\OneToOne(targetEntity: User::class, cascade: ['persist'])]
-		#[ORM\JoinColumn(name: 'user', referencedColumnName: 'id', onDelete: 'CASCADE')]
+		#[ORM\OneToOne(inversedBy: 'verification', targetEntity: User::class)]
+		#[ORM\JoinColumn(name: 'user', onDelete: 'CASCADE')]
 		public readonly User $user,
 	) {
 	}

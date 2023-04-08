@@ -56,19 +56,19 @@ class User implements JsonSerializable {
 	/**
 	 * @var PasswordRecovery|null Password recovery
 	 */
-	#[ORM\OneToOne(mappedBy: 'user', targetEntity: PasswordRecovery::class, cascade: ['persist'], orphanRemoval: true)]
+	#[ORM\OneToOne(mappedBy: 'user', targetEntity: PasswordRecovery::class, cascade: ['persist', 'refresh', 'remove'], orphanRemoval: true)]
 	public ?PasswordRecovery $passwordRecovery = null;
 
 	/**
 	 * @var UserInvitation|null User invitation
 	 */
-	#[ORM\OneToOne(mappedBy: 'user', targetEntity: UserInvitation::class, cascade: ['persist'], orphanRemoval: true)]
+	#[ORM\OneToOne(mappedBy: 'user', targetEntity: UserInvitation::class, cascade: ['persist', 'refresh', 'remove'], orphanRemoval: true)]
 	public ?UserInvitation $invitation = null;
 
 	/**
 	 * @var UserVerification|null User verification
 	 */
-	#[ORM\OneToOne(mappedBy: 'user', targetEntity: UserVerification::class, cascade: ['persist'], orphanRemoval: true)]
+	#[ORM\OneToOne(mappedBy: 'user', targetEntity: UserVerification::class, cascade: ['persist', 'refresh', 'remove'], orphanRemoval: true)]
 	public ?UserVerification $verification = null;
 
 	/**

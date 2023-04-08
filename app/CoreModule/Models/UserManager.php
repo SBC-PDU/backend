@@ -128,12 +128,12 @@ class UserManager {
 		}
 		if ($user->passwordRecovery !== null) {
 			$this->entityManager->remove($user->passwordRecovery);
+			$this->entityManager->flush();
 		}
-		$recovery = new PasswordRecovery($user);
-		$user->passwordRecovery = $recovery;
+		$user->passwordRecovery = new PasswordRecovery($user);
 		$this->entityManager->persist($user);
-		$this->mailSender->sendPasswordRecovery($recovery, $baseUrl);
 		$this->entityManager->flush();
+		$this->mailSender->sendPasswordRecovery($user->passwordRecovery, $baseUrl);
 	}
 
 	/**
@@ -142,7 +142,7 @@ class UserManager {
 	 */
 	public function delete(User $user): void {
 		if (($user->role === UserRole::Admin) && $this->hasOnlySingleAdmin()) {
-			throw new BadMethodCallException('Admin user deletion forbidden for the only admin user');
+			throw new BadMethodCallException('Admin user deletion forbidden for the single admin user');
 		}
 		$this->entityManager->remove($user);
 		$this->entityManager->flush();
@@ -258,15 +258,11 @@ class UserManager {
 			throw new InvalidAccountStateException('User is already verified');
 		}
 		if ($verification->isExpired()) {
-			try {
-				$this->sendVerificationEmail($user, $baseUrl);
-			} catch (SendException) {
-				// Ignore failure
-			}
 			throw new ResourceExpiredException('Verification link expired');
 		}
 		$user->state = $user->state->verify();
 		$this->entityManager->persist($user);
+		$this->entityManager->remove($verification);
 		$this->entityManager->flush();
 		if ($user->state->isBlocked()) {
 			throw new BlockedAccountException('User is blocked');
@@ -280,16 +276,14 @@ class UserManager {
 	 * @throws SendException
 	 */
 	public function sendInvitationEmail(User $user, string $baseUrl): void {
-		$repository = $this->entityManager->getUserInvitationRepository();
-		$currentInvitation = $repository->findOneBy(['user' => $user]);
-		if ($currentInvitation instanceof UserInvitation) {
-			$this->entityManager->remove($currentInvitation);
+		if ($user->invitation !== null) {
+			$this->entityManager->remove($user->invitation);
+			$this->entityManager->flush();
 		}
-		$invitation = new UserInvitation($user);
-		$user->invitation = $invitation;
+		$user->invitation = new UserInvitation($user);
 		$this->entityManager->persist($user);
 		$this->entityManager->flush();
-		$this->mailSender->sendPasswordSet($invitation, $baseUrl);
+		$this->mailSender->sendPasswordSet($user->invitation, $baseUrl);
 	}
 
 	/**
@@ -303,14 +297,14 @@ class UserManager {
 		if ($user->state->isVerified()) {
 			throw new InvalidAccountStateException('User is already verified');
 		}
-		if ($user->verification instanceof UserVerification) {
+		if ($user->verification !== null) {
 			$this->entityManager->remove($user->verification);
+			$this->entityManager->flush();
 		}
-		$verification = new UserVerification($user);
-		$user->verification = $verification;
+		$user->verification = new UserVerification($user);
 		$this->entityManager->persist($user);
 		$this->entityManager->flush();
-		$this->mailSender->sendVerification($verification, $baseUrl);
+		$this->mailSender->sendVerification($user->verification, $baseUrl);
 	}
 
 }

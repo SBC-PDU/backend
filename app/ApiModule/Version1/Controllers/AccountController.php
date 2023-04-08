@@ -102,6 +102,10 @@ class AccountController extends BaseController {
 		responses:
 			"200":
 				description: Success
+				content:
+					application/json:
+						schema:
+							$ref: "#/components/schemas/UserSignedIn"
 			"400":
 				$ref: "#/components/responses/BadRequest"
 			"403":
@@ -116,14 +120,14 @@ class AccountController extends BaseController {
 			throw new ClientErrorException('API key is used', ApiResponse::S403_FORBIDDEN);
 		}
 		$this->validator->validateRequest('accountEdit', $request);
-		$json = $request->getJsonBody();
+		$json = $request->getJsonBodyCopy();
 		try {
 			$user->editFromJson($json);
 			if (($json['changePassword'] ?? false) === true) {
 				$user->changePassword($json['oldPassword'], $json['newPassword']);
 			}
 			$this->manager->edit($user, $baseUrl);
-			return $response->withStatus(ApiResponse::S200_OK);
+			return $this->createSignedInResponse($response, $user);
 		} catch (InvalidEmailAddressException | InvalidPasswordException $e) {
 			throw new ClientErrorException($e->getMessage(), ApiResponse::S400_BAD_REQUEST);
 		} catch (InvalidUserLanguageException) {
@@ -137,6 +141,12 @@ class AccountController extends BaseController {
 	#[Method('POST')]
 	#[OpenApi('
 		summary: Resends the verification e-mail
+		requestBody:
+			required: false
+			content:
+				application/json:
+					schema:
+						$ref: "#/components/schemas/AccountResendVerification"
 		responses:
 			"200":
 				description: Success
@@ -151,20 +161,29 @@ class AccountController extends BaseController {
 		if (!$user instanceof User) {
 			throw new ClientErrorException('API key is used', ApiResponse::S403_FORBIDDEN);
 		}
+		if ($request->getContentsCopy() !== '') {
+			$this->validator->validateRequest('accountResendVerification', $request);
+		}
 		try {
 			$this->manager->sendVerificationEmail($user, $baseUrl);
+			return $response->withStatus(ApiResponse::S200_OK);
 		} catch (SendException $e) {
 			throw new ServerErrorException('Unable to send the e-mail', ApiResponse::S500_INTERNAL_SERVER_ERROR, $e);
 		} catch (InvalidAccountStateException $e) {
 			throw new ClientErrorException('User is already verified', ApiResponse::S400_BAD_REQUEST, $e);
 		}
-		return $response->withStatus(ApiResponse::S200_OK);
 	}
 
 	#[Path('/verification/{uuid}')]
 	#[Method('POST')]
 	#[OpenApi('
 		summary: Verifies the user
+		requestBody:
+			required: false
+			content:
+				application/json:
+					schema:
+						$ref: "#/components/schemas/AccountVerify"
 		responses:
 			"200":
 				description: Success
@@ -184,10 +203,14 @@ class AccountController extends BaseController {
 	#[RequestParameter(name: 'uuid', type: 'integer', description: 'User verification UUID')]
 	public function verify(ApiRequest $request, ApiResponse $response): ApiResponse {
 		$baseUrl = BaseUrlHelper::get($request);
+		if ($request->getContentsCopy() !== '') {
+			$this->validator->validateRequest('accountVerify', $request);
+		}
 		try {
 			$verification = $this->entityManager->getUserVerificationRepository()
 				->getByUuid($request->getParameter('uuid'));
 			$this->manager->verify($verification, $baseUrl);
+			return $this->createSignedInResponse($response, $verification->user);
 		} catch (ResourceNotFoundException) {
 			throw new ClientErrorException('User verification not found', ApiResponse::S404_NOT_FOUND);
 		} catch (ResourceExpiredException) {
@@ -197,7 +220,15 @@ class AccountController extends BaseController {
 		} catch (BlockedAccountException) {
 			throw new ClientErrorException('User is blocked', ApiResponse::S403_FORBIDDEN);
 		}
-		$user = $verification->user;
+	}
+
+	/**
+	 * Creates signed in user response
+	 * @param ApiResponse $response API response
+	 * @param User $user User to sign in
+	 * @return ApiResponse Signed in user response
+	 */
+	protected function createSignedInResponse(ApiResponse $response, User $user): ApiResponse {
 		$json = [
 			'info' => $user->jsonSerialize(),
 			'token' => $this->manager->createJwt($user),

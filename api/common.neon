@@ -57,6 +57,10 @@ components:
 	schemas:
 		AccountEdit:
 			$ref: https://sbc-pdu.romanondracek.cz/apiSchemas/requests/accountEdit.json
+		AccountResendVerification:
+			$ref: https://sbc-pdu.romanondracek.cz/apiSchemas/requests/accountResendVerification.json
+		AccountVerify:
+			$ref: https://sbc-pdu.romanondracek.cz/apiSchemas/requests/accountVerify.json
 		DeviceAdd:
 			$ref: https://sbc-pdu.romanondracek.cz/apiSchemas/requests/deviceAdd.json
 		DeviceDetail:

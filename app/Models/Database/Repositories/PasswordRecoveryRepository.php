@@ -22,6 +22,7 @@ namespace App\Models\Database\Repositories;
 
 use App\Exceptions\ResourceNotFoundException;
 use App\Models\Database\Entities\PasswordRecovery;
+use App\Models\Database\Entities\User;
 use Doctrine\ORM\EntityRepository;
 
 /**
@@ -29,6 +30,15 @@ use Doctrine\ORM\EntityRepository;
  * @extends EntityRepository<PasswordRecovery>
  */
 class PasswordRecoveryRepository extends EntityRepository {
+
+	/**
+	 * Finds the password recovery by user
+	 * @param User $user User
+	 * @return array<PasswordRecovery> Password recovery entities
+	 */
+	public function findByUser(User $user): array {
+		return $this->findBy(['user' => $user->getId()]);
+	}
 
 	/**
 	 * Finds the password recovery by UUID
