@@ -15,6 +15,7 @@
 services:
 	- App\ApiModule\Version1\Controllers\Authentication\PasswordController
 	- App\ApiModule\Version1\Controllers\Authentication\SignController
+	- App\ApiModule\Version1\Controllers\Authentication\TokenController
 	- App\ApiModule\Version1\Controllers\AccountController
 	- App\ApiModule\Version1\Controllers\DeviceController
 	- App\ApiModule\Version1\Controllers\OpenApiController

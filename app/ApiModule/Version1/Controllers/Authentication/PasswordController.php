@@ -96,6 +96,8 @@ class PasswordController extends AuthenticationController {
 					application/json:
 						schema:
 							$ref: "#/components/schemas/UserSignedIn"
+			"403":
+				description: User is blocked
 			"404":
 				description: Password recovery not found
 			"410":
@@ -117,6 +119,9 @@ class PasswordController extends AuthenticationController {
 			$user->setPassword($body['password']);
 			$this->entityManager->remove($user->passwordRecovery);
 			$this->entityManager->flush();
+			if ($user->state->isBlocked()) {
+				throw new ClientErrorException('User is blocked', ApiResponse::S403_FORBIDDEN);
+			}
 			return $this->createSignedInResponse($response, $user);
 		} catch (ResourceNotFoundException) {
 			throw new ClientErrorException('Password recovery request not found', ApiResponse::S404_NOT_FOUND);
@@ -142,6 +147,8 @@ class PasswordController extends AuthenticationController {
 					application/json:
 						schema:
 							$ref: "#/components/schemas/UserSignedIn"
+			"403":
+				description: User is blocked
 			"404":
 				description: Password set not found
 			"410":
@@ -165,6 +172,9 @@ class PasswordController extends AuthenticationController {
 			$user->invitation = null;
 			$this->entityManager->persist($user);
 			$this->entityManager->flush();
+			if ($user->state->isBlocked()) {
+				throw new ClientErrorException('User is blocked', ApiResponse::S403_FORBIDDEN);
+			}
 			return $this->createSignedInResponse($response, $user);
 		} catch (ResourceNotFoundException) {
 			throw new ClientErrorException('Password set request not found', ApiResponse::S404_NOT_FOUND);

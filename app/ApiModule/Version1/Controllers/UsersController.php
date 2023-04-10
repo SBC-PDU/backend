@@ -26,6 +26,7 @@ use Apitte\Core\Annotation\Controller\Path;
 use Apitte\Core\Annotation\Controller\RequestParameter;
 use Apitte\Core\Annotation\Controller\Tag;
 use Apitte\Core\Exception\Api\ClientErrorException;
+use Apitte\Core\Exception\Api\ServerErrorException;
 use Apitte\Core\Http\ApiRequest;
 use Apitte\Core\Http\ApiResponse;
 use App\ApiModule\Version1\Models\RestApiSchemaValidator;
@@ -41,6 +42,7 @@ use App\Exceptions\ResourceNotFoundException;
 use App\Models\Database\Entities\User;
 use App\Models\Database\Enums\UserRole;
 use BadMethodCallException;
+use Nette\Mail\SendException;
 
 /**
  * User manager API controller
@@ -271,6 +273,43 @@ class UsersController extends BaseController {
 			return $response->withStatus(ApiResponse::S200_OK);
 		} catch (InvalidAccountStateException $e) {
 			throw new ClientErrorException('User is not blocked', ApiResponse::S409_CONFLICT, $e);
+		}
+	}
+
+	#[Path('/{id}/resend')]
+	#[Method('POST')]
+	#[OpenApi('
+		summary: Resends invitation or verification e-mail
+		responses:
+			"200":
+				description: Success
+			"400":
+				description: User is not in invited or unverified state
+				content:
+					"application/json":
+						schema:
+							$ref: "#/components/schemas/Error"
+			"403":
+				$ref: "#/components/responses/Forbidden"
+			"404":
+				description: Not found
+	')]
+	#[RequestParameter(name: 'id', type: 'integer', description: 'User ID')]
+	public function resend(ApiRequest $request, ApiResponse $response): ApiResponse {
+		self::checkScopes($request, ['admin']);
+		$user = $this->getUser($request);
+		$baseUrl = BaseUrlHelper::get($request);
+		try {
+			if ($user->state->isInvited()) {
+				$this->manager->sendInvitationEmail($user, $baseUrl);
+			} elseif ($user->state->isUnverified()) {
+				$this->manager->sendVerificationEmail($user, $baseUrl);
+			} else {
+				throw new ClientErrorException('User is not in invited or unverified state', ApiResponse::S400_BAD_REQUEST);
+			}
+			return $response->withStatus(ApiResponse::S200_OK);
+		} catch (SendException $e) {
+			throw new ServerErrorException('Unable to send the e-mail', ApiResponse::S500_INTERNAL_SERVER_ERROR, $e);
 		}
 	}
 

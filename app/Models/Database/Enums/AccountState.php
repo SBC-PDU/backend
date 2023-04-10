@@ -76,6 +76,14 @@ enum AccountState: int {
 	}
 
 	/**
+	 * Checks if the account is invited
+	 * @return bool Is the account invited?
+	 */
+	public function isInvited(): bool {
+		return $this === self::Invited || $this === self::BlockedInvited;
+	}
+
+	/**
 	 * Checks if the account is verified
 	 * @return bool Is the account verified?
 	 */
