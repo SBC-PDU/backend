@@ -73,7 +73,7 @@ class OpenApiController extends BaseController {
 	#[Path('/schemas/{type}/{name}')]
 	#[Method('GET')]
 	#[OpenApi('
-		summary: Returns OpenAPI schema
+		summary: Returns JSON schema
 		security:
 			- []
 		requestParameters:
@@ -94,7 +94,7 @@ class OpenApiController extends BaseController {
 				content:
 					application/json:
 						schema:
-							type: object
+							$ref: "#/components/schemas/JsonSchema"
 			"404":
 				description: Not found
 	')]
