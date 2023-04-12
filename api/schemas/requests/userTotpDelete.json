@@ -1,0 +1,33 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema",
+	"$id": "https://sbc-pdu.romanondracek.cz/apiSchemas/requests/userTotpDelete.json",
+	"type": "object",
+	"title": "TOTP delete request",
+	"additionalProperties": false,
+	"required": [
+		"code",
+		"password"
+	],
+	"properties": {
+		"code": {
+			"$id": "#/properties/code",
+			"type": "string",
+			"pattern": "^[0-9]{6}$",
+			"title": "Current TOTP code",
+			"example": "123456"
+		},
+		"password": {
+			"$id": "#/properties/password",
+			"type": "string",
+			"title": "Current password",
+			"example": "Curr3nt passw0rd"
+		},
+		"baseUrl": {
+			"$id": "#/properties/baseUrl",
+			"type": "string",
+			"format": "url",
+			"title": "Frontend base URL",
+			"example": "http://localhost/"
+		}
+	}
+}

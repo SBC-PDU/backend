@@ -20,6 +20,7 @@ declare(strict_types = 1);
 
 namespace App\Models\Database\Entities;
 
+use App\Exceptions\IncorrectPasswordException;
 use App\Exceptions\InvalidEmailAddressException;
 use App\Exceptions\InvalidPasswordException;
 use App\Exceptions\InvalidUserLanguageException;
@@ -30,6 +31,8 @@ use App\Models\Database\Enums\AccountState;
 use App\Models\Database\Enums\UserLanguage;
 use App\Models\Database\Enums\UserRole;
 use App\Models\Database\Repositories\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Egulias\EmailValidator\EmailValidator;
 use Egulias\EmailValidator\Validation\DNSCheckValidation;
@@ -94,6 +97,12 @@ class User implements JsonSerializable {
 	private ?string $password;
 
 	/**
+	 * @var Collection<int, UserTotp> User TOTP tokens
+	 */
+	#[ORM\OneToMany(mappedBy: 'user', targetEntity: UserTotp::class, cascade: ['persist', 'refresh', 'remove'], orphanRemoval: true)]
+	private Collection $totp;
+
+	/**
 	 * Constructor
 	 * @param string $name User name
 	 * @param string $email User's email
@@ -120,6 +129,7 @@ class User implements JsonSerializable {
 		} else {
 			$this->setPassword($password);
 		}
+		$this->totp = new ArrayCollection();
 	}
 
 	/**
@@ -177,10 +187,12 @@ class User implements JsonSerializable {
 	 * Changes the user's password
 	 * @param string $oldPassword Current password
 	 * @param string $newPassword New password to set
+	 * @throws IncorrectPasswordException Incorrect current password
+	 * @throws InvalidPasswordException Invalid new password
 	 */
 	public function changePassword(string $oldPassword, string $newPassword): void {
 		if (!$this->verifyPassword($oldPassword)) {
-			throw new InvalidPasswordException('Incorrect current password.');
+			throw new IncorrectPasswordException('Incorrect current password.');
 		}
 		$this->setPassword($newPassword);
 	}
@@ -247,6 +259,7 @@ class User implements JsonSerializable {
 	/**
 	 * Sets the user's password
 	 * @param string $password User's password
+	 * @throws InvalidPasswordException Invalid password
 	 */
 	public function setPassword(string $password): void {
 		if ($password === '') {
@@ -254,6 +267,28 @@ class User implements JsonSerializable {
 		}
 		$this->password = password_hash($password, PASSWORD_DEFAULT);
 		$this->passwordChanged = true;
+	}
+
+	/**
+	 * Checks if the user has 2FA enabled
+	 * @return bool Does the user have 2FA enabled?
+	 */
+	public function has2Fa(): bool {
+		return $this->totp->count() !== 0;
+	}
+
+	/**
+	 * Verifies the TOTP code
+	 * @param string $code TOTP code to verify
+	 * @return bool Is the TOTP code correct?
+	 */
+	public function verifyTotpCode(string $code): bool {
+		foreach ($this->totp as $totp) {
+			if ($totp->verify($code)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -281,6 +316,7 @@ class User implements JsonSerializable {
 			'language' => $this->language->value,
 			'state' => $this->state->toString(),
 			'createdAt' => $this->createdAt->format('Y-m-d\TH:i:sp'),
+			'has2Fa' => $this->has2Fa(),
 		];
 	}
 

@@ -56,7 +56,11 @@ class SignController extends AuthenticationController {
 						schema:
 							$ref: "#/components/schemas/UserSignedIn"
 			"400":
-				$ref: "#/components/responses/BadRequest"
+				description: "Invalid credentials, 2FA code is required or incorrect 2FA code"
+				content:
+					application/json:
+						schema:
+							$ref: "#/components/schemas/Error"
 			"403":
 				description: Account has been blocked
 			"500":
@@ -70,6 +74,14 @@ class SignController extends AuthenticationController {
 			!$user->verifyPassword($credentials['password'])
 		) {
 			throw new ClientErrorException('Invalid credentials', ApiResponse::S400_BAD_REQUEST);
+		}
+		if ($user->has2Fa()) {
+			if (!array_key_exists('code', $credentials)) {
+				throw new ClientErrorException('2FA code is required', ApiResponse::S400_BAD_REQUEST);
+			}
+			if (!$user->verifyTotpCode($credentials['code'])) {
+				throw new ClientErrorException('Incorrect 2FA code', ApiResponse::S400_BAD_REQUEST);
+			}
 		}
 		if ($user->state->isBlocked()) {
 			throw new ClientErrorException('Account is blocked', ApiResponse::S403_FORBIDDEN);

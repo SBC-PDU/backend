@@ -27,7 +27,7 @@ use App\Models\Database\Entities\UserVerification;
 use Nette\Mail\SendException;
 
 /**
- * E-mail address verification mail sender
+ * User mail sender
  */
 class UserMailSender extends BaseMailSender {
 

@@ -23,12 +23,10 @@ namespace App\ApiModule\Version1\Controllers\Authentication;
 use Apitte\Core\Annotation\Controller\Method;
 use Apitte\Core\Annotation\Controller\OpenApi;
 use Apitte\Core\Annotation\Controller\Path;
-use Apitte\Core\Exception\Api\ClientErrorException;
 use Apitte\Core\Http\ApiRequest;
 use Apitte\Core\Http\ApiResponse;
 use App\ApiModule\Version1\Controllers\AuthenticationController;
-use App\ApiModule\Version1\RequestAttributes;
-use App\Models\Database\Entities\User;
+use App\ApiModule\Version1\Utils\SignedInUserHelper;
 
 /**
  * JWT token controller
@@ -51,10 +49,7 @@ class TokenController extends AuthenticationController {
 				$ref: "#/components/responses/Forbidden"
 	')]
 	public function signIn(ApiRequest $request, ApiResponse $response): ApiResponse {
-		$user = $request->getAttribute(RequestAttributes::AppLoggedUser);
-		if (!$user instanceof User) {
-			throw new ClientErrorException('API key is used', ApiResponse::S403_FORBIDDEN);
-		}
+		$user = SignedInUserHelper::get($request);
 		return $this->createSignedInResponse($response, $user);
 	}
 

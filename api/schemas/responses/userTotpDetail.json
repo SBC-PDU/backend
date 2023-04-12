@@ -1,0 +1,34 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema",
+	"$id": "https://sbc-pdu.romanondracek.cz/apiSchemas/responses/userTotpDetail.json",
+	"type": "object",
+	"title": "User TOTP details",
+	"additionalProperties": false,
+	"required": [
+		"uuid",
+		"name",
+		"createdAt"
+	],
+	"properties": {
+		"uuid": {
+			"$id": "#/properties/uuid",
+			"type": "string",
+			"pattern": "^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$",
+			"title": "TOTP UUID",
+			"example": "5d92beb1-25a4-4864-8387-d0479c29e603"
+		},
+		"name": {
+			"$id": "#/properties/name",
+			"type": "string",
+			"title": "Name",
+			"example": "Google Authenticator"
+		},
+		"createdAt": {
+			"$id": "#/properties/createdAt",
+			"title": "Created at",
+			"type": "string",
+			"format": "date-time",
+			"example": "2023-03-22T23:44:49+01:00"
+		}
+	}
+}

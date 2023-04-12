@@ -17,5 +17,13 @@
 	"passwordSet": {
 		"title": "Setting up a password for your new account",
 		"body": "an account has been created for you by an administrator. To set your password, click the link below. Please note that this link will expire in 24 hours."
+	},
+	"totpAdded": {
+		"title": "Two-factor authentication token added",
+		"body": "a two-factor authentication token %name% has been added to your account.\nIf you did not add this token, please contact your administrator immediately."
+	},
+	"totpDeleted": {
+		"title": "Two-factor authentication token deleted",
+		"body": "a two-factor authentication token %name% has been deleted from your account.\nIf you did not delete this token, please contact your administrator immediately."
 	}
 }

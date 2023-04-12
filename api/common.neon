@@ -91,6 +91,12 @@ components:
 			$ref: https://sbc-pdu.romanondracek.cz/apiSchemas/requests/userSignIn.json
 		UserSignedIn:
 			$ref: https://sbc-pdu.romanondracek.cz/apiSchemas/responses/userSignedIn.json
+		TotpAdd:
+			$ref: https://sbc-pdu.romanondracek.cz/apiSchemas/requests/userTotpAdd.json
+		TotpDelete:
+			$ref: https://sbc-pdu.romanondracek.cz/apiSchemas/requests/userTotpDelete.json
+		TotpDetail:
+			$ref: https://sbc-pdu.romanondracek.cz/apiSchemas/responses/userTotpDetail.json
 	securitySchemes:
 		bearerAuth:
 			type: http

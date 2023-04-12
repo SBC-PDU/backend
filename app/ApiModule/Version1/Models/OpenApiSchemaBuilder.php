@@ -45,6 +45,7 @@ class OpenApiSchemaBuilder {
 	public function getArray(): array {
 		$schema = $this->schemaBuilder->build()->toArray();
 		$schema['paths']['/v1/openapi']['get']['security'] = [new stdClass()];
+		$schema['paths']['/v1/openapi/schemas/{type}/{name}']['get']['security'] = [new stdClass()];
 		$schema['paths']['/v1/auth/password/recovery']['post']['security'] = [new stdClass()];
 		$schema['paths']['/v1/auth/password/reset/{uuid}']['post']['security'] = [new stdClass()];
 		$schema['paths']['/v1/auth/sign/in']['post']['security'] = [new stdClass()];

@@ -13,6 +13,7 @@
 # limitations under the License.
 
 services:
+	- App\Models\Mail\Senders\TotpMailSender
 	- App\Models\Mail\Senders\UserMailSender
 
 mail:

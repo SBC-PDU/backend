@@ -23,11 +23,15 @@ namespace App\ApiModule\Version1\Controllers;
 use Apitte\Core\Annotation\Controller\Method;
 use Apitte\Core\Annotation\Controller\OpenApi;
 use Apitte\Core\Annotation\Controller\Path;
+use Apitte\Core\Annotation\Controller\RequestParameter;
 use Apitte\Core\Annotation\Controller\Tag;
+use Apitte\Core\Exception\Api\ClientErrorException;
 use Apitte\Core\Http\ApiRequest;
 use Apitte\Core\Http\ApiResponse;
 use App\ApiModule\Version1\Models\OpenApiSchemaBuilder;
 use App\ApiModule\Version1\Models\RestApiSchemaValidator;
+use Nette\IOException;
+use Nette\Utils\FileSystem;
 
 /**
  * OpenAPI controller
@@ -64,6 +68,48 @@ class OpenApiController extends BaseController {
 	')]
 	public function index(ApiRequest $request, ApiResponse $response): ApiResponse {
 		return $response->writeJsonBody($this->schemaBuilder->getArray());
+	}
+
+	#[Path('/schemas/{type}/{name}')]
+	#[Method('GET')]
+	#[OpenApi('
+		summary: Returns OpenAPI schema
+		security:
+			- []
+		requestParameters:
+			-
+				name: type
+				type: string
+				in: path
+				required: true
+				description: Type of schema
+				schema:
+					type: string
+					enum:
+						- requests
+						- responses
+		responses:
+			"200":
+				description: Success
+				content:
+					application/json:
+						schema:
+							type: object
+			"404":
+				description: Not found
+	')]
+	#[RequestParameter(name: 'name', type: 'string', in: 'path', required: true, description: 'Name of schema')]
+	public function getSchema(ApiRequest $request, ApiResponse $response): ApiResponse {
+		$type = $request->getParameter('type');
+		$name = $request->getParameter('name');
+		$path = __DIR__ . '/../../../../api/schemas/' . $type . '/' . $name . '.json';
+		try {
+			return $response->writeBody(FileSystem::read($path))
+				->withHeader('Content-Type', 'application/json')
+				->withStatus(ApiResponse::S200_OK);
+		} catch (IOException) {
+			throw new ClientErrorException('Schema not found', ApiResponse::S404_NOT_FOUND);
+		}
 	}
 
 }

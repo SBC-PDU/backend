@@ -10,7 +10,9 @@
 		"email",
 		"language",
 		"role",
-		"state"
+		"state",
+		"createdAt",
+		"has2Fa"
 	],
 	"properties": {
 		"id": {
@@ -65,6 +67,19 @@
 				"invited"
 			],
 			"example": "verified"
+		},
+		"createdAt": {
+			"$id": "#/properties/createdAt",
+			"title": "Created at",
+			"type": "string",
+			"format": "date-time",
+			"example": "2023-03-22T23:44:49+01:00"
+		},
+		"has2Fa": {
+			"$id": "#/properties/has2Fa",
+			"type": "boolean",
+			"title": "Has 2FA enabled",
+			"example": false
 		}
 	}
 }

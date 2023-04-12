@@ -17,5 +17,13 @@
 	"passwordSet": {
 		"title": "Nastavení hesla pro Váš nový účet",
 		"body": "byl Vám administrátorem vytvořen účet do správce napájecích jednotek. Chcete-li si nastavit heslo, klikněte na níže uvedený odkaz. Platnost odkazu je 24 hodin."
+	},
+	"totpAdded": {
+		"title": "Přidání tokenu pro dvoufaktorovou autentizaci",
+		"body": "k Vašemu uživatelskému účtu byl přidán token pro dvoufaktorovou autentizaci %name%.\nPokud jste o přidání tokenu nežádali, kontaktujte administrátora."
+	},
+	"totpDeleted": {
+		"title": "Odebrání tokenu pro dvoufaktorovou autentizaci",
+		"body": "z Vašeho uživatelského účtu byl odebrán token pro dvoufaktorovou autentizaci %name%.\nPokud jste o odebrání tokenu nežádali, kontaktujte administrátora."
 	}
 }

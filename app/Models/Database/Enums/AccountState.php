@@ -34,13 +34,14 @@ enum AccountState: int {
 	case Verified = 1;
 
 	/// Blocked unverified account
-
 	case BlockedUnverified = 2;
 
 	/// Blocked verified account
 	case BlockedVerified = 3;
+
 	/// Invited account
 	case Invited = 4;
+
 	/// Blocked invited account
 	case BlockedInvited = 5;
 

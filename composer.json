@@ -29,7 +29,7 @@
 		"darsyn/ip": "^4.1.0",
 		"egulias/email-validator": "^4.0.1",
 		"guzzlehttp/guzzle": "^7.5.0",
-		"influxdata/influxdb-client-php": "^3.2.0",
+		"influxdata/influxdb-client-php": "^3.3.0",
 		"justinrainbow/json-schema": "^5.2.12",
 		"latte/latte": "^v3.0.6",
 		"lcobucci/clock": "^3.0",
@@ -57,21 +57,22 @@
 		"php-mqtt/client": "^v1.8.0",
 		"ramsey/uuid": "^4.7.3",
 		"ramsey/uuid-doctrine": "^2.0.0",
-		"tracy/tracy": "^v2.10.0",
-		"web-auth/webauthn-lib": "^4.5"
+		"spomky-labs/otphp": "^11.2.0",
+		"tracy/tracy": "^v2.10.2",
+		"web-auth/webauthn-lib": "^4.5.1"
 	},
 	"require-dev": {
 		"contributte/qa": "^v0.3.0",
 		"mockery/mockery": "^1.5.1",
 		"nette/tester": "^v2.5.0",
 		"ninjify/nunjuck": "^v0.4.0",
-		"phpstan/phpstan": "1.10.7",
+		"phpstan/phpstan": "1.10.11",
 		"phpstan/phpstan-deprecation-rules": "^1.1.3",
 		"phpstan/phpstan-doctrine": "^1.3.37",
 		"phpstan/phpstan-mockery": "^1.1.1",
 		"phpstan/phpstan-nette": "^1.2.4",
-		"phpstan/phpstan-strict-rules": "^1.5.0",
-		"phpstan/phpstan-symfony": "^1.2.23"
+		"phpstan/phpstan-strict-rules": "^1.5.1",
+		"phpstan/phpstan-symfony": "^1.2.25"
 	},
 	"autoload": {
 		"psr-4": {

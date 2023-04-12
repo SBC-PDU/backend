@@ -25,12 +25,14 @@ use App\Models\Database\Entities\DeviceOutput;
 use App\Models\Database\Entities\PasswordRecovery;
 use App\Models\Database\Entities\User;
 use App\Models\Database\Entities\UserInvitation;
+use App\Models\Database\Entities\UserTotp;
 use App\Models\Database\Entities\UserVerification;
 use App\Models\Database\Repositories\DeviceOutputRepository;
 use App\Models\Database\Repositories\DeviceRepository;
 use App\Models\Database\Repositories\PasswordRecoveryRepository;
 use App\Models\Database\Repositories\UserInvitationRepository;
 use App\Models\Database\Repositories\UserRepository;
+use App\Models\Database\Repositories\UserTotpRepository;
 use App\Models\Database\Repositories\UserVerificationRepository;
 
 /**
@@ -76,6 +78,14 @@ trait TRepositories {
 	 */
 	public function getUserRepository(): UserRepository {
 		return $this->getRepository(User::class);
+	}
+
+	/**
+	 * Returns the user TOTP repository
+	 * @return UserTotpRepository User TOTP repository
+	 */
+	public function getUserTotpRepository(): UserTotpRepository {
+		return $this->getRepository(UserTotp::class);
 	}
 
 	/**

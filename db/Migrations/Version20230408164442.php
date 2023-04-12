@@ -36,6 +36,10 @@ final class Version20230408164442 extends AbstractMigration {
 		return 'Fixes account invitations, account verification and password recovery';
 	}
 
+	/**
+	 * Applies the migration
+	 * @param Schema $schema Database schema
+	 */
 	public function up(Schema $schema): void {
 		// this up() migration is auto-generated, please modify it to your needs
 		$this->addSql('CREATE TABLE user_verification (uuid CHAR(36) NOT NULL COMMENT \'(DC2Type:uuid)\', user INT DEFAULT NULL, created_at DATETIME NOT NULL, UNIQUE INDEX UNIQ_DA3DB9098D93D649 (user), PRIMARY KEY(uuid)) DEFAULT CHARACTER SET utf8 COLLATE `utf8_unicode_ci` ENGINE = InnoDB');
@@ -45,6 +49,10 @@ final class Version20230408164442 extends AbstractMigration {
 		$this->addSql('ALTER TABLE password_recovery DROP INDEX IDX_63D401098D93D649, ADD UNIQUE INDEX UNIQ_63D401098D93D649 (user)');
 	}
 
+	/**
+	 * Reverts the migration
+	 * @param Schema $schema Database schema
+	 */
 	public function down(Schema $schema): void {
 		// this down() migration is auto-generated, please modify it to your needs
 		$this->addSql('CREATE TABLE email_verification (uuid CHAR(36) CHARACTER SET utf8 NOT NULL COLLATE `utf8_unicode_ci` COMMENT \'(DC2Type:uuid)\', user INT DEFAULT NULL, created_at DATETIME NOT NULL, UNIQUE INDEX UNIQ_FE223588D93D649 (user), PRIMARY KEY(uuid)) DEFAULT CHARACTER SET utf8 COLLATE `utf8_unicode_ci` ENGINE = InnoDB COMMENT = \'\' ');

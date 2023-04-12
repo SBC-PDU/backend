@@ -156,6 +156,7 @@ final class UserTest extends TestCase {
 			'language' => self::LANGUAGE->value,
 			'state' => self::STATE->toString(),
 			'createdAt' => '2023-01-01T00:00:00Z',
+			'has2Fa' => false,
 		];
 		Assert::same($expected, $this->entity->jsonSerialize());
 	}
