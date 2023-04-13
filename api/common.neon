@@ -49,7 +49,11 @@ components:
 					schema:
 						$ref: '#/components/schemas/Error'
 		UnauthorizedError:
-			description: API key or user token is missing or invalid
+			description: API key or user token is missing or invalid or user is not signed in or user is blocked
+			content:
+				'application/json':
+					schema:
+						$ref: '#/components/schemas/Unauthorized'
 			headers:
 				WWW-Authenticate:
 					schema:
@@ -83,6 +87,8 @@ components:
 			$ref: https://sbc-pdu.romanondracek.cz/apiSchemas/requests/passwordReset.json
 		PasswordSet:
 			$ref: https://sbc-pdu.romanondracek.cz/apiSchemas/requests/passwordSet.json
+		Unauthorized:
+			$ref: https://sbc-pdu.romanondracek.cz/apiSchemas/responses/unauthorized.json
 		UserAdd:
 			$ref: https://sbc-pdu.romanondracek.cz/apiSchemas/requests/userAdd.json
 		UserDetail:

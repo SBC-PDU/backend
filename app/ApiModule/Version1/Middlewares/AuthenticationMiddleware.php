@@ -64,7 +64,7 @@ class AuthenticationMiddleware implements IMiddleware {
 		$uuidRegex = '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}';
 		if (Strings::match($requestUrl, '~^/v1/account/verification/' . $uuidRegex . '$~') !== null ||
 			Strings::match($requestUrl, '~^/v1/auth/password/(re|)set/' . $uuidRegex . '$~') !== null ||
-			Strings::match($requestUrl, '~^/v1/openapi/schemas/(requests|responses)/.*$~') !== null) {
+			Strings::match($requestUrl, '~^/v1/openapi/schemas/(requests|responses)/\w*$~') !== null) {
 			return true;
 		}
 		if (in_array($requestUrl, array_keys(self::WHITELISTED_PATHS), true)) {
@@ -80,7 +80,7 @@ class AuthenticationMiddleware implements IMiddleware {
 	 * @return ResponseInterface Response
 	 */
 	private function createUnauthorizedResponse(ResponseInterface $response, string $message): ResponseInterface {
-		$json = Json::encode(['error' => $message]);
+		$json = Json::encode(['error' => $message, 'status' => 'error', 'code' => ApiResponse::S401_UNAUTHORIZED]);
 		$response->getBody()->write($json);
 		return $response->withStatus(ApiResponse::S401_UNAUTHORIZED)
 			->withHeader('WWW-Authenticate', 'Bearer')
