@@ -113,14 +113,14 @@ class DeviceManager {
 		$fluxQuery = 'from(bucket: "' . $this->influxDbClient->options['bucket'] . '")' .
 			' |> range(start: 0, stop: now())' .
 			$deviceQuery .
-			' |> keep(columns: ["_time", "device"])' .
 			' |> sort(columns: ["_time"], desc: false)' .
+			' |> keep(columns: ["_time", "device"])' .
 			' |> last(column: "_time")';
 		$fluxTables = $queryApi->query($fluxQuery);
 		$lastUpdated = [];
 		foreach ($fluxTables as $fluxTable) {
 			foreach ($fluxTable->records as $record) {
-				$lastUpdated[$record->values['device']] = new DateTime($record->getTime());
+				$lastUpdated[(string) $record->values['device']] = new DateTime($record->getTime());
 			}
 		}
 		return $lastUpdated;
@@ -142,7 +142,7 @@ class DeviceManager {
 		$fluxTables = $queryApi->query($fluxQuery);
 		foreach ($fluxTables as $fluxTable) {
 			foreach ($fluxTable->records as $record) {
-				$array[(int) $record->values['output'] - 1][$record->getMeasurement()] = $record->getValue();
+				$array[(int) $record->values['output'] - 1][(string) $record->getMeasurement()] = $record->getValue();
 			}
 		}
 		return $array;

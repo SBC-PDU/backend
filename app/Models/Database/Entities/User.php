@@ -94,7 +94,7 @@ class User implements JsonSerializable {
 	 * @var string|null Password hash
 	 */
 	#[ORM\Column(type: 'string', length: 255, nullable: true)]
-	private ?string $password;
+	private ?string $password = null;
 
 	/**
 	 * @var Collection<int, UserTotp> User TOTP tokens
@@ -129,6 +129,8 @@ class User implements JsonSerializable {
 		} else {
 			$this->setPassword($password);
 		}
+		$this->emailChanged = false;
+		$this->passwordChanged = false;
 		$this->totp = new ArrayCollection();
 	}
 
@@ -143,15 +145,15 @@ class User implements JsonSerializable {
 			$json['name'],
 			$json['email'],
 			$password,
-			UserRole::tryFrom($json['role']) ?? UserRole::Default,
-			UserLanguage::tryFrom($json['language']) ?? UserLanguage::Default,
+			UserRole::tryFrom($json['role'] ?? null) ?? UserRole::Default,
+			UserLanguage::tryFrom($json['language'] ?? null) ?? UserLanguage::Default,
 			$password === null ? AccountState::Invited : AccountState::Default,
 		);
 	}
 
 	/**
 	 * Edit user from JSON data
-	 * @param array{name: string, email:string, role?:string, language?: string} $json JSON data
+	 * @param array{name: string, email: string, role?: string, language?: string} $json JSON data
 	 * @throws InvalidEmailAddressException Invalid email address
 	 * @throws InvalidUserLanguageException Invalid user language
 	 * @throws InvalidUserRoleException Invalid user role
@@ -177,9 +179,9 @@ class User implements JsonSerializable {
 
 	/**
 	 * Returns the user's email
-	 * @return string|null User's email
+	 * @return string User's email
 	 */
-	public function getEmail(): ?string {
+	public function getEmail(): string {
 		return $this->email;
 	}
 
@@ -241,8 +243,8 @@ class User implements JsonSerializable {
 	 */
 	public function setEmail(string $email): void {
 		$this->validateEmail($email);
-		if (isset($this->email) && $this->email !== $email && $this->state->isVerified()) {
-			$this->state = $this->state->unverify();
+		if (!isset($this->email) || $this->email !== $email) {
+			$this->state = $this->state->isUnverified() ? $this->state : $this->state->unverify();
 			$this->emailChanged = true;
 		}
 		$this->email = $email;
@@ -265,8 +267,24 @@ class User implements JsonSerializable {
 		if ($password === '') {
 			throw new InvalidPasswordException('Empty new password.');
 		}
+		$this->passwordChanged = !$this->verifyPassword($password);
 		$this->password = password_hash($password, PASSWORD_DEFAULT);
-		$this->passwordChanged = true;
+	}
+
+	/**
+	 * Adds a TOTP to the user
+	 * @param UserTotp $totp TOTP to add
+	 */
+	public function addTotp(UserTotp $totp): void {
+		$this->totp->add($totp);
+	}
+
+	/**
+	 * Deletes a TOTP from the user
+	 * @param UserTotp $totp TOTP to delete
+	 */
+	public function deleteTotp(UserTotp $totp): void {
+		$this->totp->removeElement($totp);
 	}
 
 	/**
@@ -305,7 +323,7 @@ class User implements JsonSerializable {
 
 	/**
 	 * Returns the JSON serialized User entity
-	 * @return array<string, int|string> JSON serialized User entity
+	 * @return array<string, bool|int|string|null> JSON serialized User entity
 	 */
 	public function jsonSerialize(): array {
 		return [

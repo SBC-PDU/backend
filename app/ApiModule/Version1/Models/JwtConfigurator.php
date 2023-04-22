@@ -20,9 +20,11 @@ declare(strict_types = 1);
 
 namespace App\ApiModule\Version1\Models;
 
+use App\Exceptions\JwtConfigurationException;
 use Lcobucci\JWT\Configuration;
 use Lcobucci\JWT\Signer\Ecdsa\Sha384 as EcdsaSha256;
 use Lcobucci\JWT\Signer\Key\InMemory;
+use Nette\IOException;
 use Nette\Utils\FileSystem;
 
 /**
@@ -33,15 +35,38 @@ class JwtConfigurator {
 	/**
 	 * Creates a JWT configuration
 	 * @return Configuration JWT configuration
+	 * @throws JwtConfigurationException
 	 */
 	public function create(): Configuration {
 		$signer = new EcdsaSha256();
 		$dir = __DIR__ . '/../../../cert';
-		$privateKey = FileSystem::read($dir . '/privkey.pem');
-		$signingKey = InMemory::plainText($privateKey);
-		$certificate = openssl_pkey_get_public(FileSystem::read($dir . '/cert.pem'));
-		$verificationKey = openssl_pkey_get_details($certificate)['key'];
-		return Configuration::forAsymmetricSigner($signer, $signingKey, InMemory::plainText($verificationKey));
+		try {
+			$privateKey = FileSystem::read($dir . '/privkey.pem');
+			if ($privateKey === '') {
+				throw new JwtConfigurationException('Private key file is empty');
+			}
+			$signingKey = InMemory::plainText($privateKey);
+		} catch (IOException) {
+			throw new JwtConfigurationException('Private key file not found');
+		}
+		try {
+			$certificate = FileSystem::read($dir . '/cert.pem');
+			if ($certificate === '') {
+				throw new JwtConfigurationException('Certificate file is empty');
+			}
+			$publicKey = openssl_pkey_get_public($certificate);
+			if ($publicKey === false) {
+				throw new JwtConfigurationException('Certificate file is invalid, reason: ' . openssl_error_string());
+			}
+		} catch (IOException) {
+			throw new JwtConfigurationException('Certificate file not found');
+		}
+		$publicKeyDetails = openssl_pkey_get_details($publicKey);
+		if ($publicKeyDetails === false) {
+			throw new JwtConfigurationException('Unable to get details about public key, reason: ' . openssl_error_string());
+		}
+		$verificationKey = InMemory::plainText($publicKeyDetails['key']);
+		return Configuration::forAsymmetricSigner($signer, $signingKey, $verificationKey);
 	}
 
 }

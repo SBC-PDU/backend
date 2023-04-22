@@ -42,7 +42,11 @@ class BaseUrlHelper {
 		} catch (JsonException) {
 			// Ignore
 		}
-		return explode($request->getUri()->getPath(), (string) $request->getUri(), 2)[0];
+		$path = $request->getUri()->getPath();
+		if ($path === '') {
+			return (string) $request->getUri();
+		}
+		return explode($path, (string) $request->getUri(), 2)[0];
 	}
 
 }

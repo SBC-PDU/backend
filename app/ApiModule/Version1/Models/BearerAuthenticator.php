@@ -52,7 +52,7 @@ class BearerAuthenticator implements IAuthenticator {
 	public function authenticate(ServerRequestInterface $request): ?User {
 		$header = $request->getHeader('Authorization')[0] ?? '';
 		$token = $this->parseAuthorizationHeader($header);
-		if ($token === null) {
+		if ($token === null || $token === '') {
 			return null;
 		}
 		return $this->authenticateUser($token);
@@ -60,10 +60,10 @@ class BearerAuthenticator implements IAuthenticator {
 
 	/**
 	 * Authenticates the user
-	 * @param string|null $jwt User's JWT token
+	 * @param non-empty-string $jwt User's JWT token
 	 * @return User|null Authenticated user
 	 */
-	public function authenticateUser(?string $jwt): ?User {
+	public function authenticateUser(string $jwt): ?User {
 		$configuration = $this->configurator->create();
 		$token = $configuration->parser()->parse($jwt);
 		assert($token instanceof Plain);

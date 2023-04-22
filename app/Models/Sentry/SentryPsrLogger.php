@@ -48,7 +48,7 @@ class SentryPsrLogger implements LoggerInterface {
 			SentrySdk::getCurrentHub()->captureException($context['exception']);
 		} else {
 			$event = Event::createEvent();
-			$event->setMessage($message);
+			$event->setMessage((string) $message);
 			if ($context !== []) {
 				$event->setExtra($context);
 			}

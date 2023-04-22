@@ -28,6 +28,7 @@ use App\Models\Database\Entities\UserTotp;
 use App\Models\Database\EntityManager;
 use App\Models\Database\Repositories\UserTotpRepository;
 use App\Models\Mail\Senders\TotpMailSender;
+use ValueError;
 
 /**
  * TOTP manager
@@ -67,9 +68,14 @@ class TotpManager {
 	 * @return UserTotp Created TOTP token
 	 * @throws IncorrectPasswordException Incorrect password
 	 * @throws IncorrectTotpCodeException Incorrect TOTP code
+	 * @throws ValueError Secret cannot be empty
 	 */
 	public function add(User $user, array $json): UserTotp {
-		$totp = new UserTotp($user, $json['secret'], $json['name']);
+		$secret = $json['secret'];
+		if ($secret === '') {
+			throw new ValueError('Secret cannot be empty');
+		}
+		$totp = new UserTotp($user, $secret, $json['name']);
 		if (!$totp->verify($json['code'])) {
 			throw new IncorrectTotpCodeException('Incorrect code');
 		}

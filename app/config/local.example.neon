@@ -24,7 +24,7 @@ parameters:
 		bucket: 'sbc_pdu'
 		org: 'sbc_pdu'
 		precision: \InfluxDB2\Model\WritePrecision::S
-		timeout: 2
+		timeout: 10
 	mqtt:
 		host: localhost
 		port: 1883

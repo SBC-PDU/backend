@@ -41,7 +41,7 @@ class UserTotp implements JsonSerializable {
 	/**
 	 * Constructor
 	 * @param User $user User
-	 * @param string $secret Secret
+	 * @param non-empty-string $secret Secret
 	 * @param string $name Name
 	 */
 	public function __construct(
@@ -61,6 +61,9 @@ class UserTotp implements JsonSerializable {
 	 * @return bool Is the TOTP code valid?
 	 */
 	public function verify(string $code): bool {
+		if ($code === '') {
+			return false;
+		}
 		$totp = TOTP::createFromSecret($this->secret);
 		return $totp->verify(otp: $code, leeway: 15);
 	}

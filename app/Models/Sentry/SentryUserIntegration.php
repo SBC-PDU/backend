@@ -52,9 +52,12 @@ class SentryUserIntegration extends BaseIntegration {
 		}
 
 		$header = $httpRequest->getHeader('Authorization') ?? '';
+		if ($header === '') {
+			return $event;
+		}
 		$token = $this->authenticator->parseAuthorizationHeader($header);
 
-		if ($token === null) {
+		if ($token === null || $token === '') {
 			return $event;
 		}
 

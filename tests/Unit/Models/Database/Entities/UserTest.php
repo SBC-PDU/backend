@@ -28,10 +28,12 @@ namespace Tests\Unit\Models\Database\Entities;
 use App\Exceptions\InvalidEmailAddressException;
 use App\Exceptions\InvalidPasswordException;
 use App\Models\Database\Entities\User;
+use App\Models\Database\Entities\UserTotp;
 use App\Models\Database\Enums\AccountState;
 use App\Models\Database\Enums\UserLanguage;
 use App\Models\Database\Enums\UserRole;
 use DateTime;
+use OTPHP\TOTP;
 use Tester\Assert;
 use Tester\TestCase;
 
@@ -73,35 +75,72 @@ final class UserTest extends TestCase {
 	private const STATE = AccountState::Unverified;
 
 	/**
+	 * User created at
+	 */
+	private const CREATED_AT = '2023-01-01T00:00:00Z';
+
+	/**
+	 * TOTP secret
+	 */
+	private const TOTP_SECRET = 'JDDK4U6G3BJLEZ7Y';
+
+	/**
 	 * @var User User entity
 	 */
 	private User $entity;
 
 	/**
-	 * Tests the function to get the user's ID
+	 * @var UserTotp User TOTP entity
+	 */
+	private UserTotp $totpEntity;
+
+	/**
+	 * Tests the method to create a new user entity from JSON
+	 */
+	public function testCreateFromJson(): void {
+		$this->entity = User::createFromJson([
+			'name' => self::USERNAME,
+			'email' => self::EMAIL,
+			'password' => self::PASSWORD,
+			'role' => self::ROLE->value,
+			'language' => self::LANGUAGE->value,
+		]);
+		Assert::same(self::USERNAME, $this->entity->name);
+		Assert::same(self::EMAIL, $this->entity->getEmail());
+		Assert::false($this->entity->isInvited());
+		Assert::true($this->entity->verifyPassword(self::PASSWORD));
+		Assert::same(self::ROLE, $this->entity->role);
+		Assert::same(self::LANGUAGE, $this->entity->language);
+		Assert::same(self::STATE, $this->entity->state);
+	}
+
+	/**
+	 * Tests the method to get the user's ID
 	 */
 	public function testGetId(): void {
 		Assert::null($this->entity->getId());
 	}
 
 	/**
-	 * Tests the function to get the user's email address
+	 * Tests the method to get the user's email address
 	 */
 	public function testGetEmail(): void {
 		Assert::same(self::EMAIL, $this->entity->getEmail());
 	}
 
 	/**
-	 * Tests the function to set the user's email address (valid e-mail address)
+	 * Tests the method to set the user's email address (valid e-mail address)
 	 */
 	public function testSetEmailValid(): void {
 		$email = 'test@romanondracek.cz';
+		Assert::false($this->entity->hasChangedEmail());
 		$this->entity->setEmail($email);
 		Assert::same($email, $this->entity->getEmail());
+		Assert::true($this->entity->hasChangedEmail());
 	}
 
 	/**
-	 * Tests the function to set the user's email address (invalid e-mail address)
+	 * Tests the method to set the user's email address (invalid e-mail address)
 	 */
 	public function testSetEmailInvalid(): void {
 		Assert::throws(function (): void {
@@ -110,7 +149,7 @@ final class UserTest extends TestCase {
 	}
 
 	/**
-	 * Tests the function to set the user's email address (missing MX DNS record)
+	 * Tests the method to set the user's email address (missing MX DNS record)
 	 */
 	public function testSetEmailMissingMx(): void {
 		Assert::throws(function (): void {
@@ -119,16 +158,28 @@ final class UserTest extends TestCase {
 	}
 
 	/**
-	 * Tests the function to set the user's password
+	 * Tests the method to set the user's password
 	 */
 	public function testSetPassword(): void {
 		$password = 'admin';
+		Assert::false($this->entity->hasChangedPassword());
 		$this->entity->setPassword($password);
 		Assert::true($this->entity->verifyPassword($password));
+		Assert::true($this->entity->hasChangedPassword());
 	}
 
 	/**
-	 * Tests the function to set the user's password (empty string)
+	 * Tests the method to set the user's password (new password is the same as the old one)
+	 */
+	public function testSetPasswordSame(): void {
+		Assert::false($this->entity->hasChangedPassword());
+		$this->entity->setPassword(self::PASSWORD);
+		Assert::true($this->entity->verifyPassword(self::PASSWORD));
+		Assert::false($this->entity->hasChangedPassword());
+	}
+
+	/**
+	 * Tests the method to set the user's password (empty string)
 	 */
 	public function testSetPasswordEmptyString(): void {
 		Assert::throws(function (): void {
@@ -137,7 +188,21 @@ final class UserTest extends TestCase {
 	}
 
 	/**
-	 * Tests the function to verify the user's password
+	 * Tests the methods to check if the user has 2FA enabled, add, delete and verify TOTP code
+	 */
+	public function testTotp(): void {
+		Assert::false($this->entity->has2Fa());
+		$this->entity->addTotp($this->totpEntity);
+		Assert::true($this->entity->has2Fa());
+		Assert::true($this->entity->verifyTotpCode(TOTP::createFromSecret(self::TOTP_SECRET)->now()));
+		Assert::false($this->entity->verifyTotpCode('123456'));
+		$this->entity->deleteTotp($this->totpEntity);
+		Assert::false($this->entity->has2Fa());
+		Assert::false($this->entity->verifyTotpCode(TOTP::createFromSecret(self::TOTP_SECRET)->now()));
+	}
+
+	/**
+	 * Tests the method to verify the user's password
 	 */
 	public function testVerifyPassword(): void {
 		Assert::true($this->entity->verifyPassword(self::PASSWORD));
@@ -145,7 +210,7 @@ final class UserTest extends TestCase {
 	}
 
 	/**
-	 * Tests the function to return JSON serialized entity
+	 * Tests the method to return JSON serialized entity
 	 */
 	public function testJsonSerialize(): void {
 		$expected = [
@@ -155,7 +220,7 @@ final class UserTest extends TestCase {
 			'role' => self::ROLE->value,
 			'language' => self::LANGUAGE->value,
 			'state' => self::STATE->toString(),
-			'createdAt' => '2023-01-01T00:00:00Z',
+			'createdAt' => self::CREATED_AT,
 			'has2Fa' => false,
 		];
 		Assert::same($expected, $this->entity->jsonSerialize());
@@ -167,7 +232,8 @@ final class UserTest extends TestCase {
 	protected function setUp(): void {
 		parent::setUp();
 		$this->entity = new User(self::USERNAME, self::EMAIL, self::PASSWORD, self::ROLE, self::LANGUAGE);
-		$this->entity->setCreatedAt(new DateTime('2023-01-01T00:00:00Z'));
+		$this->entity->setCreatedAt(new DateTime(self::CREATED_AT));
+		$this->totpEntity = new UserTotp($this->entity, self::TOTP_SECRET, 'TOTP authenticator');
 	}
 
 }
