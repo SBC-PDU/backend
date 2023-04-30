@@ -1,0 +1,89 @@
+# Copyright 2022-2023 Roman Ondráček
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+image: $CI_REGISTRY_IMAGE:testing
+
+stages:
+  - build-docker-testing
+  - test
+  - coding-style
+  - deploy
+
+variables:
+  COMPOSER_CACHE_DIR: temp/composer/cache
+
+cache:
+  paths:
+    - temp/composer/cache
+
+build-docker-testing:
+  stage: build-docker-testing
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script: []
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker build -f docker/testing/Dockerfile -t $CI_REGISTRY_IMAGE:testing docker/testing/
+    - docker push $CI_REGISTRY_IMAGE:testing
+  only:
+    refs:
+      - master
+
+before_script:
+  - cp app/config/local.example.neon app/config/local.neon
+  - composer install
+
+test:
+  stage: test
+  script:
+    - update-alternatives --set php /usr/bin/php${PHP_VERSION}
+    - vendor/bin/tester -c ./tests/php.ini ./tests
+  after_script:
+    - 'for i in $(find ./tests -name \*.actual); do echo "--- $i"; cat $i; echo; echo; done'
+  parallel:
+    matrix:
+      - PHP_VERSION:
+          - '8.1'
+          - '8.2'
+
+coverage:
+  stage: test
+  script:
+    - vendor/bin/tester -c ./tests/php.ini -o none --coverage ./coverage.html --coverage-src ./app ./tests
+  allow_failure: true
+  coverage: '^(\d{1,3})% covered$'
+  artifacts:
+    paths:
+      - 'coverage.html'
+    expire_in: 2 weeks
+
+coding-style:
+  script:
+    - composer create-project nette/code-checker temp/code-checker --no-interaction
+    - php temp/code-checker/code-checker -l --no-progress --strict-types -i "coverage.*" -i "tests/temp/"
+  stage: coding-style
+  needs: [build-docker-testing]
+
+phpstan:
+  script:
+    - NETTE_TESTER_RUNNER=1 vendor/bin/phpstan analyse -c phpstan.neon
+  stage: coding-style
+  needs: [build-docker-testing]
+
+qa:
+  script:
+    - vendor/bin/codesniffer --runtime-set php_version 80100 app bin tests
+  stage: coding-style
+  needs: [build-docker-testing]
