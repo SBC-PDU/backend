@@ -76,7 +76,7 @@ Tento repozitář obsahuje backendovou část pro centrální správu napájecí
 	```bash
 	php bin/console fixtures:load --append --no-interaction
 	```
-6. Spusťtě server pomocí příkazu:
+6. Spusťte server pomocí příkazu:
 	```bash
 	php -S localhost:8090 -t www/
 	```
