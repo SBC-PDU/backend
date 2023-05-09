@@ -67,6 +67,7 @@ Tento repozitář obsahuje backendovou část pro centrální správu napájecí
 			username: ''                                   # Uživatelské jméno pro SMTP server
 			password: ''                                   # Heslo pro SMTP server
 			secure: null                                   # null, 'ssl' (TLS) nebo 'tls' (STARTTLS)
+			from: ''                                       # Adresa odesílatele e-mailů (např. sbc-pdu@example.com)
 	```
 4. Proveďte migraci databáze pomocí příkazu:
 	```bash

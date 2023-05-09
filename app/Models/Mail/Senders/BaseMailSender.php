@@ -34,11 +34,13 @@ abstract class BaseMailSender {
 
 	/**
 	 * Constructor
+	 * @param string $from Sender e-mail address
 	 * @param Mailer $mailer Mailer
 	 * @param TemplateFactory $templateFactory Template factory
 	 * @param Translator $translator Translator
 	 */
 	public function __construct(
+		private readonly string $from,
 		private readonly Mailer $mailer,
 		protected readonly TemplateFactory $templateFactory,
 		protected readonly Translator $translator,
@@ -71,7 +73,7 @@ abstract class BaseMailSender {
 		}
 		$html = $this->renderTemplate($fileName, array_merge($defaultParams, $params));
 		$mail = new Message();
-		$mail->setFrom('sbc_pdu@romanondracek.cz', $this->translator->translate('mail.title', $user->language->value));
+		$mail->setFrom($this->from, $this->translator->translate('mail.title', $user->language->value));
 		if ($user !== null) {
 			$mail->addTo($user->getEmail(), $user->name);
 		}

@@ -13,8 +13,8 @@
 # limitations under the License.
 
 services:
-	- App\Models\Mail\Senders\TotpMailSender
-	- App\Models\Mail\Senders\UserMailSender
+	- App\Models\Mail\Senders\TotpMailSender(%smtp.from%)
+	- App\Models\Mail\Senders\UserMailSender(%smtp.from%)
 
 mail:
 	smtp: true
