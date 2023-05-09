@@ -1,0 +1,551 @@
+{
+	"info": {
+		"_postman_id": "f72a7a79-2819-406b-b0f5-f079c59a2e13",
+		"name": "sbc-pdu-manager",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Sign in",
+					"item": [
+						{
+							"name": "Sign in (invalid password)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Status code is 400', function () {",
+											"    pm.response.to.have.status(400);",
+											"});",
+											"pm.test('Content-Type is \\'application/json\\'', function () {",
+											"    pm.response.to.have.header('Content-Type');",
+											"    pm.expect(pm.response.headers.get('Content-Type')).to.eql('application/json');",
+											"});",
+											"pm.test('Error message is \\'Invalid credentials\\'', function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.message).to.eql('Invalid credentials');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\"email\": \"admin@romanondracek.cz\", \"password\": \"password\"}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/v1/auth/sign/in",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"v1",
+										"auth",
+										"sign",
+										"in"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Sign in (invalid password type)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Status code is 400', function () {",
+											"    pm.response.to.have.status(400);",
+											"});",
+											"pm.test('Content-Type is \\'application/json\\'', function () {",
+											"    pm.response.to.have.header('Content-Type');",
+											"    pm.expect(pm.response.headers.get('Content-Type')).to.eql('application/json');",
+											"});",
+											"pm.test('Error message is \\'JSON does not validate\\'', function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.message).to.eql('JSON does not validate. JSON schema: requests/userSignIn Violations:\\n[password] Integer value found, but a string is required');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\"email\": \"admin@romanondracek.cz\", \"password\": 1234}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/v1/auth/sign/in",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"v1",
+										"auth",
+										"sign",
+										"in"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Sign in (invalid e-mail)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Status code is 400', function () {",
+											"    pm.response.to.have.status(400);",
+											"});",
+											"pm.test('Content-Type is \\'application/json\\'', function () {",
+											"    pm.response.to.have.header('Content-Type');",
+											"    pm.expect(pm.response.headers.get('Content-Type')).to.eql('application/json');",
+											"});",
+											"pm.test('Error message is \\'Invalid credentials\\'', function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.message).to.eql('Invalid credentials');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\"email\": \"invalid@romanondracek.cz\", \"password\": \"admin\"}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/v1/auth/sign/in",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"v1",
+										"auth",
+										"sign",
+										"in"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Sign in (invalid JSON syntax)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Status code is 400', function () {",
+											"    pm.response.to.have.status(400);",
+											"});",
+											"pm.test('Content-Type is \\'application/json\\'', function () {",
+											"    pm.response.to.have.header('Content-Type');",
+											"    pm.expect(pm.response.headers.get('Content-Type')).to.eql('application/json');",
+											"});",
+											"pm.test('Error message is \\'Invalid JSON syntax\\'', function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.message).to.eql('Invalid JSON syntax');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\"email\": \"admin@romanondracek.cz\", \"password\": \"admin\",}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/v1/auth/sign/in",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"v1",
+										"auth",
+										"sign",
+										"in"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Sign in (extra JSON property)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('Status code is 400', function () {",
+											"    pm.response.to.have.status(400);",
+											"});",
+											"pm.test('Content-Type is \\'application/json\\'', function () {",
+											"    pm.response.to.have.header('Content-Type');",
+											"    pm.expect(pm.response.headers.get('Content-Type')).to.eql('application/json');",
+											"});",
+											"pm.test('Error message is \\'JSON does not validate\\'', function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.message).to.eql('JSON does not validate. JSON schema: requests/userSignIn Violations:\\n[] The property extra is not defined and the definition does not allow additional properties');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\"email\": \"admin@romanondracek.cz\", \"password\": \"admin\", \"extra\": true}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/v1/auth/sign/in",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"v1",
+										"auth",
+										"sign",
+										"in"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"auth": {
+						"type": "noauth"
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Refresh JWT token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Content-Type is \\'application/json\\'', function () {",
+									"    pm.response.to.have.header('Content-Type');",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.eql('application/json');",
+									"});",
+									"pm.test('Check user info', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.info).to.eql(pm.collectionVariables.get('userInfo'));",
+									"});",
+									"pm.test('Check JWT token', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.token).to.not.eql(pm.collectionVariables.get('token'));",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"email\": \"admin@romanondracek.cz\", \"password\": \"admin\"}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/auth/token/refresh",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"auth",
+								"token",
+								"refresh"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Account",
+			"item": [
+				{
+					"name": "Get info",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Content-Type is \\'application/json\\'', function () {",
+									"    pm.response.to.have.header('Content-Type');",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.eql('application/json');",
+									"});",
+									"pm.test('User info is correct', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.eql(pm.collectionVariables.get('userInfo'));",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/v1/account",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"account"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update language to cs",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const userInfo = pm.collectionVariables.get('userInfo');",
+									"const jsonBody = {",
+									"    language: 'cs',",
+									"    email: userInfo.email,",
+									"    name: userInfo.name,",
+									"    changePassword: false,",
+									"}",
+									"console.log(JSON.stringify(jsonBody));",
+									"postman.setEnvironmentVariable('body', JSON.stringify(jsonBody));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{{body}}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/account",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"account"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verify changed language",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Content-Type is \\'application/json\\'', function () {",
+									"    pm.response.to.have.header('Content-Type');",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.eql('application/json');",
+									"});",
+									"pm.test('User info is correct', function () {",
+									"    var jsonData = pm.response.json();",
+									"    let userInfo = pm.collectionVariables.get('userInfo');",
+									"    userInfo.language = 'cs';",
+									"    pm.expect(jsonData).to.eql(userInfo);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/v1/account",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"account"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "localhost:8090",
+			"type": "default"
+		},
+		{
+			"key": "token",
+			"value": ""
+		},
+		{
+			"key": "userInfo",
+			"value": ""
+		},
+		{
+			"key": "userId",
+			"value": ""
+		}
+	]
+}
