@@ -69,19 +69,27 @@ Tento repozitář obsahuje backendovou část pro centrální správu napájecí
 			secure: null                                   # null, 'ssl' (TLS) nebo 'tls' (STARTTLS)
 			from: ''                                       # Adresa odesílatele e-mailů (např. sbc-pdu@example.com)
 	```
-4. Proveďte migraci databáze pomocí příkazu:
+4. Vygenerujte privátní klíč a certifikát pro podpis JWT tokenů:
+	```bash
+	openssl ecparam -name secp384r1 -genkey -param_enc named_curve -out app/cert/privkey.pem
+	openssl req -new -x509 -sha256 -nodes -days 3650 \
+      -subj "/CN=SBC PDU management/C=CZ/ST=South Moravian Region/L=Boskovice/O=Roman Ondráček" \
+      -key app/cert/privkey.pem -out app/cert/cert.pem
+    ```
+5. Proveďte migraci databáze pomocí příkazu:
 	```bash
 	php bin/console migrations:migrate --no-interaction
 	```
-5. Vytvořte výchozího uživatele `admin@romanondracek.cz`:`admin` pomocí příkazu:
+6. Vytvořte výchozího uživatele `admin@romanondracek.cz`:`admin` pomocí příkazu:
 	```bash
 	php bin/console fixtures:load --append --no-interaction
 	```
-6. Spusťte server pomocí příkazu:
+7. Spusťte server pomocí příkazu:
 	```bash
 	php -S localhost:8090 -t www/
 	```
-7. Spusťte MQTT klienta pomocí příkazu:
+8. Spusťte MQTT klienta pomocí příkazu:
 	```bash
 	php bin/console mqtt
 	```
+9. REST API je dostupné na adrese `http://localhost:8090/api/v1/`.
