@@ -244,7 +244,7 @@ class User implements JsonSerializable {
 	public function setEmail(string $email): void {
 		$this->validateEmail($email);
 		if (!isset($this->email) || $this->email !== $email) {
-			$this->state = $this->state->isUnverified() ? $this->state : $this->state->unverify();
+			$this->state = $this->state->isVerified() ? $this->state->unverify() : $this->state;
 			$this->emailChanged = true;
 		}
 		$this->email = $email;
