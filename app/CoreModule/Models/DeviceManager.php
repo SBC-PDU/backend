@@ -142,7 +142,7 @@ class DeviceManager {
 		$fluxTables = $queryApi->query($fluxQuery);
 		foreach ($fluxTables as $fluxTable) {
 			foreach ($fluxTable->records as $record) {
-				$array[(int) $record->values['output'] - 1][(string) $record->getMeasurement()] = $record->getValue();
+				$array[(int) $record->values['output'] - 1][$record->getMeasurement()] = $record->getValue();
 			}
 		}
 		return $array;
@@ -175,7 +175,7 @@ class DeviceManager {
 				}
 				$value = $record->getValue();
 				$time = new DateTime($record->getTime());
-				$array[$record->values['output']]['measurements'][(string) $record->getMeasurement()][] = [
+				$array[$record->values['output']]['measurements'][$record->getMeasurement()][] = [
 					'time' => $time->format('Y-m-d\TH:i:sp'),
 					'value' => is_float($value) ? $value : null,
 				];
