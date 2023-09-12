@@ -81,10 +81,9 @@ class SignController extends AuthenticationController {
 			}
 			if (!$user->verifyTotpCode($credentials['code'])) {
 				throw new ClientErrorException('Incorrect 2FA code', ApiResponse::S400_BAD_REQUEST);
-			} else {
-				$this->entityManager->refresh($user);
-				$this->entityManager->flush();
 			}
+			$this->entityManager->refresh($user);
+			$this->entityManager->flush();
 		}
 		if ($user->state->isBlocked()) {
 			throw new ClientErrorException('Account is blocked', ApiResponse::S403_FORBIDDEN);

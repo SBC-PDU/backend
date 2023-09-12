@@ -73,7 +73,7 @@ abstract class BaseMailSender {
 		}
 		$html = $this->renderTemplate($fileName, array_merge($defaultParams, $params));
 		$mail = new Message();
-		$mail->setFrom($this->from, $this->translator->translate('mail.title', $user->language->value));
+		$mail->setFrom($this->from, $this->translator->translate('mail.title'));
 		if ($user !== null) {
 			$mail->addTo($user->getEmail(), $user->name);
 		}

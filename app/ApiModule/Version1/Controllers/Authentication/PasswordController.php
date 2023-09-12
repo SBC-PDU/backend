@@ -117,7 +117,8 @@ class PasswordController extends AuthenticationController {
 			}
 			$user = $recoveryRequest->user;
 			$user->setPassword($body['password']);
-			$this->entityManager->remove($user->passwordRecovery);
+			$user->passwordRecovery = null;
+			$this->entityManager->persist($user);
 			$this->entityManager->flush();
 			if ($user->state->isBlocked()) {
 				throw new ClientErrorException('User is blocked', ApiResponse::S403_FORBIDDEN);

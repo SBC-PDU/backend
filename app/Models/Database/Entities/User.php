@@ -145,8 +145,8 @@ class User implements JsonSerializable {
 			$json['name'],
 			$json['email'],
 			$password,
-			UserRole::tryFrom($json['role'] ?? null) ?? UserRole::Default,
-			UserLanguage::tryFrom($json['language'] ?? null) ?? UserLanguage::Default,
+			UserRole::tryFrom($json['role'] ?? UserRole::Default->value) ?? UserRole::Default,
+			UserLanguage::tryFrom($json['language'] ?? UserLanguage::Default->value) ?? UserLanguage::Default,
 			$password === null ? AccountState::Invited : AccountState::Default,
 		);
 	}

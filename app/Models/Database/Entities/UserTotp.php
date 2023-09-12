@@ -83,11 +83,11 @@ class UserTotp implements JsonSerializable {
 
 	/**
 	 * Serializes TOTP entity into JSON
-	 * @return array{uuid: string, name: string, createdAt: string, lastUsedAt: string|null} JSON serialized TOTP entity
+	 * @return array{uuid: string|null, name: string, createdAt: string, lastUsedAt: string|null} JSON serialized TOTP entity
 	 */
 	public function jsonSerialize(): array {
 		return [
-			'uuid' => $this->uuid->toString(),
+			'uuid' => $this->uuid?->toString(),
 			'name' => $this->name,
 			'createdAt' => $this->createdAt->format('Y-m-d\TH:i:sp'),
 			'lastUsedAt' => $this->lastUsedAt?->format('Y-m-d\TH:i:sp'),

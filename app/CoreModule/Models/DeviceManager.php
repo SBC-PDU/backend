@@ -117,6 +117,9 @@ class DeviceManager {
 			' |> keep(columns: ["_time", "device"])' .
 			' |> last(column: "_time")';
 		$fluxTables = $queryApi->query($fluxQuery);
+		if ($fluxTables === null) {
+			return [];
+		}
 		$lastUpdated = [];
 		foreach ($fluxTables as $fluxTable) {
 			foreach ($fluxTable->records as $record) {
@@ -140,6 +143,9 @@ class DeviceManager {
 			' |> filter(fn: (r) => r["device"] == "' . $device->id . '")' .
 			' |> last()';
 		$fluxTables = $queryApi->query($fluxQuery);
+		if ($fluxTables === null) {
+			return [];
+		}
 		foreach ($fluxTables as $fluxTable) {
 			foreach ($fluxTable->records as $record) {
 				$array[(int) $record->values['output'] - 1][$record->getMeasurement()] = $record->getValue();
@@ -164,6 +170,9 @@ class DeviceManager {
 			' |> yield(name: "mean")';
 		$array = [];
 		$fluxTables = $queryApi->query($fluxQuery);
+		if ($fluxTables === null) {
+			return [];
+		}
 		foreach ($fluxTables as $fluxTable) {
 			foreach ($fluxTable->records as $record) {
 				$outputIndex = (int) $record->values['output'];

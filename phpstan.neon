@@ -22,7 +22,7 @@ includes:
 	- vendor/phpstan/phpstan-symfony/extension.neon
 
 parameters:
-	level: 7
+	level: 8
 	paths:
 		- app
 		- bin
@@ -32,3 +32,8 @@ parameters:
 	fileExtensions:
 		- php
 		- phpt
+	ignoreErrors:
+		-
+			message: '#Parameter \$timestamp of method OTPHP\\TOTP::verify\(\) expects int<0, max>|null, int given.#'
+			path: 'app/Models/Database/Entities/UserTotp.php'
+			count: 1

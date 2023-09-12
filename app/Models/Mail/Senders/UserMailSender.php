@@ -24,6 +24,7 @@ use App\Models\Database\Entities\PasswordRecovery;
 use App\Models\Database\Entities\User;
 use App\Models\Database\Entities\UserInvitation;
 use App\Models\Database\Entities\UserVerification;
+use InvalidArgumentException;
 use Nette\Mail\SendException;
 
 /**
@@ -39,8 +40,12 @@ class UserMailSender extends BaseMailSender {
 	 */
 	public function sendVerification(UserVerification $verification, string $baseUrl = ''): void {
 		$user = $verification->user;
+		$uuid = $verification->getUuid();
+		if ($uuid === null) {
+			throw new InvalidArgumentException('Verification UUID cannot be null');
+		}
 		$params = [
-			'url' => $baseUrl . '/account/verification/' . $verification->getUuid()->toString(),
+			'url' => $baseUrl . '/account/verification/' . $uuid->toString(),
 		];
 		$this->sendMessage('accountVerification.latte', $params, $user);
 	}
@@ -60,8 +65,12 @@ class UserMailSender extends BaseMailSender {
 	 * @throws SendException
 	 */
 	public function sendPasswordSet(UserInvitation $invitation, string $baseUrl = ''): void {
+		$uuid = $invitation->getUuid();
+		if ($uuid === null) {
+			throw new InvalidArgumentException('Invitation UUID cannot be null');
+		}
 		$params = [
-			'url' => $baseUrl . '/auth/password/set/' . $invitation->getUuid()->toString(),
+			'url' => $baseUrl . '/auth/password/set/' . $uuid->toString(),
 		];
 		$this->sendMessage('passwordSet.latte', $params, $invitation->user);
 	}
@@ -73,8 +82,12 @@ class UserMailSender extends BaseMailSender {
 	 * @throws SendException
 	 */
 	public function sendPasswordRecovery(PasswordRecovery $recovery, string $baseUrl = ''): void {
+		$uuid = $recovery->getUuid();
+		if ($uuid === null) {
+			throw new InvalidArgumentException('Password recovery UUID cannot be null');
+		}
 		$params = [
-			'url' => $baseUrl . '/auth/password/reset/' . $recovery->getUuid()->toString(),
+			'url' => $baseUrl . '/auth/password/reset/' . $uuid->toString(),
 		];
 		$this->sendMessage('passwordRecovery.latte', $params, $recovery->user);
 	}

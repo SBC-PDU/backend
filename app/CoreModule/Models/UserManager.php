@@ -133,6 +133,7 @@ class UserManager {
 		$user->passwordRecovery = new PasswordRecovery($user);
 		$this->entityManager->persist($user);
 		$this->entityManager->flush();
+		assert($user->passwordRecovery !== null);
 		$this->mailSender->sendPasswordRecovery($user->passwordRecovery, $baseUrl);
 	}
 
@@ -283,6 +284,7 @@ class UserManager {
 		$user->invitation = new UserInvitation($user);
 		$this->entityManager->persist($user);
 		$this->entityManager->flush();
+		assert($user->invitation !== null);
 		$this->mailSender->sendPasswordSet($user->invitation, $baseUrl);
 	}
 
@@ -304,6 +306,7 @@ class UserManager {
 		$user->verification = new UserVerification($user);
 		$this->entityManager->persist($user);
 		$this->entityManager->flush();
+		assert($user->verification !== null);
 		$this->mailSender->sendVerification($user->verification, $baseUrl);
 	}
 
