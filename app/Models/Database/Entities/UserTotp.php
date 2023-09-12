@@ -23,6 +23,7 @@ namespace App\Models\Database\Entities;
 use App\Models\Database\Attributes\TCreatedAt;
 use App\Models\Database\Attributes\TUuid;
 use App\Models\Database\Repositories\UserTotpRepository;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use JsonSerializable;
 use OTPHP\TOTP;
@@ -52,6 +53,8 @@ class UserTotp implements JsonSerializable {
 		public readonly string $secret,
 		#[ORM\Column(type: 'string', length: 255, unique: true)]
 		public string $name,
+		#[ORM\Column(type: 'datetime', nullable: true, options: ['default' => null])]
+		public ?DateTime $lastUsedAt = null,
 	) {
 	}
 
@@ -65,18 +68,29 @@ class UserTotp implements JsonSerializable {
 			return false;
 		}
 		$totp = TOTP::createFromSecret($this->secret);
-		return $totp->verify(otp: $code, leeway: 15);
+		$result = $totp->verify(otp: $code, leeway: 15);
+		if ($result &&
+			$this->lastUsedAt !== null &&
+			$totp->verify(otp: $code, timestamp: $this->lastUsedAt->getTimestamp(), leeway: 15)
+		) {
+			return false;
+		}
+		if ($result) {
+			$this->lastUsedAt = new DateTime();
+		}
+		return $result;
 	}
 
 	/**
 	 * Serializes TOTP entity into JSON
-	 * @return array{uuid: string, name: string, createdAt: string} JSON serialized TOTP entity
+	 * @return array{uuid: string, name: string, createdAt: string, lastUsedAt: string|null} JSON serialized TOTP entity
 	 */
 	public function jsonSerialize(): array {
 		return [
 			'uuid' => $this->uuid->toString(),
 			'name' => $this->name,
 			'createdAt' => $this->createdAt->format('Y-m-d\TH:i:sp'),
+			'lastUsedAt' => $this->lastUsedAt?->format('Y-m-d\TH:i:sp'),
 		];
 	}
 

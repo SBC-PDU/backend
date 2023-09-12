@@ -7,7 +7,8 @@
 	"required": [
 		"uuid",
 		"name",
-		"createdAt"
+		"createdAt",
+		"lastUsedAt"
 	],
 	"properties": {
 		"uuid": {
@@ -29,6 +30,20 @@
 			"type": "string",
 			"format": "date-time",
 			"example": "2023-03-22T23:44:49+01:00"
+		},
+		"lastUsedAt": {
+			"$id": "#/properties/lastUsedAt",
+			"title": "Last used at",
+			"oneOf": [
+				{
+					"type": "string",
+					"format": "date-time",
+					"example": "2023-03-22T23:44:49+01:00"
+				},
+				{
+					"type": "null"
+				}
+			]
 		}
 	}
 }
