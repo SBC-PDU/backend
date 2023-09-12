@@ -63,7 +63,7 @@ class MqttCommand extends Command {
 		$mqttClient = $this->mqttClientFactory->create();
 		$mqttClient->connect($this->mqttClientFactory->getConnectionSettings(), true);
 		$writeApi = $this->influxDbClient->createWriteApi(['writeType' => WriteType::SYNCHRONOUS]);
-		$handler = function (MqttClient $mqttClient, string $topic, string $message, int $qualityOfService, bool $retained) use ($writeApi): void {
+		$measurementHandler = function (string $topic, string $message) use ($writeApi): void {
 			$array = explode('/', $topic);
 			$device = $this->deviceManager->get($array[1]);
 			$output = (int) $array[3];
@@ -78,8 +78,29 @@ class MqttCommand extends Command {
 			}
 			$writeApi->write($this->createMeasurementPoint($device, $output, $measurement, $message));
 		};
-		$mqttClient->registerMessageReceivedEventHandler($handler);
-		$mqttClient->subscribe('sbc_pdu/+/outputs/+/+', qualityOfService: MqttClient::QOS_EXACTLY_ONCE);
+		$statusHandler = function (string $topic, string $message) use ($writeApi): void {
+			if ($message !== 'offline') {
+				return;
+			}
+			$array = explode('/', $topic);
+			$device = $this->deviceManager->get($array[1]);
+			if (!$device instanceof Device) {
+				return;
+			}
+			$measurements = [
+				MeasurementType::Alert,
+				MeasurementType::Current,
+				MeasurementType::CurrentState,
+				MeasurementType::Voltage,
+			];
+			foreach ($measurements as $measurement) {
+				foreach ($device->outputs as $output) {
+					$writeApi->write($this->createMeasurementPoint($device, $output->index, $measurement, '0'));
+				}
+			}
+		};
+		$mqttClient->subscribe('sbc_pdu/+/status', $statusHandler, MqttClient::QOS_EXACTLY_ONCE);
+		$mqttClient->subscribe('sbc_pdu/+/outputs/+/+', $measurementHandler, MqttClient::QOS_EXACTLY_ONCE);
 		$mqttClient->loop(true);
 		$mqttClient->disconnect();
 		$this->influxDbClient->close();
