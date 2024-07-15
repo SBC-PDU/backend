@@ -26,7 +26,7 @@ Tento repozitář obsahuje backendovou část pro centrální správu napájecí
 	```
 3. Vytvořte soubor `app/config/local.neon` s konfigurací:
 	```neon
-	# Copyright 2022-2023 Roman Ondráček
+	# Copyright 2022-2024 Roman Ondráček <mail@romanondracek.cz>
 	#
 	# Licensed under the Apache License, Version 2.0 (the "License");
 	# you may not use this file except in compliance with the License.
