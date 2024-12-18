@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Copyright 2022-2024 Roman Ondráček <mail@romanondracek.cz>
  *
@@ -17,6 +15,8 @@ declare(strict_types=1);
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+declare(strict_types = 1);
 
 namespace Database\Migrations;
 
@@ -41,7 +41,6 @@ final class Version20220427150900 extends AbstractMigration {
 	 * @param Schema $schema Database schema
 	 */
 	public function up(Schema $schema): void {
-		// this up() migration is auto-generated, please modify it to your needs
 		$this->addSql('CREATE TABLE `email_verification` (uuid CHAR(36) NOT NULL COMMENT \'(DC2Type:uuid)\', user INT DEFAULT NULL, created_at DATETIME NOT NULL, INDEX IDX_FE223588D93D649 (user), PRIMARY KEY(uuid)) DEFAULT CHARACTER SET utf8 COLLATE `utf8_unicode_ci` ENGINE = InnoDB');
 		$this->addSql('CREATE TABLE `password_recovery` (uuid CHAR(36) NOT NULL COMMENT \'(DC2Type:uuid)\', user INT DEFAULT NULL, created_at DATETIME NOT NULL, INDEX IDX_63D401098D93D649 (user), PRIMARY KEY(uuid)) DEFAULT CHARACTER SET utf8 COLLATE `utf8_unicode_ci` ENGINE = InnoDB');
 		$this->addSql('CREATE TABLE `users` (id INT AUTO_INCREMENT NOT NULL, name VARCHAR(255) NOT NULL, email VARCHAR(255) NOT NULL, password VARCHAR(255) NOT NULL, role VARCHAR(15) NOT NULL, state INT DEFAULT 0 NOT NULL, language VARCHAR(7) NOT NULL, UNIQUE INDEX UNIQ_1483A5E9E7927C74 (email), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8 COLLATE `utf8_unicode_ci` ENGINE = InnoDB');
@@ -54,7 +53,6 @@ final class Version20220427150900 extends AbstractMigration {
 	 * @param Schema $schema Database schema
 	 */
 	public function down(Schema $schema): void {
-		// this down() migration is auto-generated, please modify it to your needs
 		$this->addSql('ALTER TABLE `email_verification` DROP FOREIGN KEY FK_FE223588D93D649');
 		$this->addSql('ALTER TABLE `password_recovery` DROP FOREIGN KEY FK_63D401098D93D649');
 		$this->addSql('DROP TABLE `email_verification`');

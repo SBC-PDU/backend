@@ -13,50 +13,49 @@
 # limitations under the License.
 
 extensions:
-	nettrine.annotations: Nettrine\Annotations\DI\AnnotationsExtension
-	nettrine.cache: Nettrine\Cache\DI\CacheExtension
 	nettrine.dbal: Nettrine\DBAL\DI\DbalExtension
-	nettrine.dbal.console: Nettrine\DBAL\DI\DbalConsoleExtension
 	nettrine.fixtures: Nettrine\Fixtures\DI\FixturesExtension
 	nettrine.orm: Nettrine\ORM\DI\OrmExtension
-	nettrine.orm.cache: Nettrine\ORM\DI\OrmCacheExtension
-	nettrine.orm.console: Nettrine\ORM\DI\OrmConsoleExtension
-	nettrine.orm.attributes: Nettrine\ORM\DI\OrmAttributesExtension
 	nettrine.migrations: Nettrine\Migrations\DI\MigrationsExtension
 
-nettrine.annotations:
-	debug: %debugMode%
-
 nettrine.dbal:
-	connection:
-		driver: pdo_mysql
-		host: %database.host%
-		user: %database.user%
-		password: %database.password%
-		dbname: %database.dbname%
-		types:
-			ip: Darsyn\IP\Doctrine\MultiType
-			uuid: Ramsey\Uuid\Doctrine\UuidType
-			uuid_binary_ordered_time:
-				class: Ramsey\Uuid\Doctrine\UuidBinaryOrderedTimeType
-				commented: false
+	connections:
+		default:
+			driver: pdo_mysql
+			host: %database.host%
+			user: %database.user%
+			password: %database.password%
+			dbname: %database.dbname%
+			serverVersion: %database.serverVersion%
+			charset: utf8mb4
+			defaultTableOptions:
+				charset: utf8mb4
+				collation: utf8mb4_unicode_ci
 	debug:
 		panel: %debugMode%
+	types:
+		ip: Darsyn\IP\Doctrine\MultiType
+		uuid: Ramsey\Uuid\Doctrine\UuidType
 
 nettrine.fixtures:
 	paths:
 		- %appDir%/../db/Fixtures
 
 nettrine.orm:
-	entityManagerDecoratorClass: App\Models\Database\EntityManager
-
-nettrine.orm.attributes:
-	mapping:
-		App\Models\Database\Entities: %appDir%/Models/Database/Entities
+	managers:
+		default:
+			connection: default
+			entityManagerDecoratorClass: App\Models\Database\EntityManager
+			autoGenerateProxyClasses: 4
+			mapping:
+				App:
+					type: attributes
+					dirs: [%appDir%/Models/Database/Entities]
+					namespace: App\Models\Database\Entities
 
 nettrine.migrations:
 	table: doctrine_migrations
 	column: version
-	directory: %appDir%/../db/Migrations
-	namespace: Database\Migrations
+	directories:
+		Database\Migrations: %appDir%/../db/Migrations
 	versionsOrganization: null

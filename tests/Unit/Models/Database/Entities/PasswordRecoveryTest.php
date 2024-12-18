@@ -42,7 +42,7 @@ final class PasswordRecoveryTest extends TestCase {
 	/**
 	 * Date time format
 	 */
-	private const DATETIME_FORMAT = 'Y-m-d H:i:00';
+	private const string DATETIME_FORMAT = 'Y-m-d H:i:00';
 
 	/**
 	 * @var PasswordRecovery Password recovery entity

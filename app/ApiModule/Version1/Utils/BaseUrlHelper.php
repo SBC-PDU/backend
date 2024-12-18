@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 /**
  * Copyright 2022-2024 Roman Ondráček <mail@romanondracek.cz>
  *
@@ -17,6 +15,8 @@ declare(strict_types = 1);
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+declare(strict_types = 1);
 
 namespace App\ApiModule\Version1\Utils;
 
@@ -37,7 +37,7 @@ class BaseUrlHelper {
 		try {
 			$jsonBody = $request->getJsonBodyCopy();
 			if (array_key_exists('baseUrl', $jsonBody)) {
-				return trim($jsonBody['baseUrl'], '/');
+				return trim((string) $jsonBody['baseUrl'], '/');
 			}
 		} catch (JsonException) {
 			// Ignore

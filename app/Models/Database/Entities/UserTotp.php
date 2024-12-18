@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 /**
  * Copyright 2022-2024 Roman Ondráček <mail@romanondracek.cz>
  *
@@ -18,13 +16,17 @@ declare(strict_types = 1);
  * limitations under the License.
  */
 
+declare(strict_types = 1);
+
 namespace App\Models\Database\Entities;
 
 use App\Models\Database\Attributes\TCreatedAt;
 use App\Models\Database\Attributes\TUuid;
 use App\Models\Database\Repositories\UserTotpRepository;
 use DateTime;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use InvalidArgumentException;
 use JsonSerializable;
 use OTPHP\TOTP;
 
@@ -42,20 +44,24 @@ class UserTotp implements JsonSerializable {
 	/**
 	 * Constructor
 	 * @param User $user User
-	 * @param non-empty-string $secret Secret
+	 * @param string $secret Secret
 	 * @param string $name Name
+	 * @throws InvalidArgumentException Secret cannot be empty
 	 */
 	public function __construct(
 		#[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'totp')]
-		#[ORM\JoinColumn(name: 'user', onDelete: 'CASCADE')]
+		#[ORM\JoinColumn(name: 'user', nullable: false, onDelete: 'CASCADE')]
 		public readonly User $user,
-		#[ORM\Column(type: 'string', length: 32, unique: true)]
+		#[ORM\Column(type: Types::STRING, length: 32, unique: true)]
 		public readonly string $secret,
-		#[ORM\Column(type: 'string', length: 255, unique: true)]
+		#[ORM\Column(type: Types::STRING, length: 255, unique: true)]
 		public string $name,
 		#[ORM\Column(type: 'datetime', nullable: true, options: ['default' => null])]
 		public ?DateTime $lastUsedAt = null,
 	) {
+		if ($secret === '') {
+			throw new InvalidArgumentException('Secret cannot be empty.');
+		}
 	}
 
 	/**
@@ -64,7 +70,7 @@ class UserTotp implements JsonSerializable {
 	 * @return bool Is the TOTP code valid?
 	 */
 	public function verify(string $code): bool {
-		if ($code === '') {
+		if ($code === '' || $this->secret === '') {
 			return false;
 		}
 		$totp = TOTP::createFromSecret($this->secret);
@@ -83,7 +89,12 @@ class UserTotp implements JsonSerializable {
 
 	/**
 	 * Serializes TOTP entity into JSON
-	 * @return array{uuid: string|null, name: string, createdAt: string, lastUsedAt: string|null} JSON serialized TOTP entity
+	 * @return array{
+	 *     uuid: string|null,
+	 *     name: string,
+	 *     createdAt: string,
+	 *     lastUsedAt: string|null,
+	 * } JSON serialized TOTP entity
 	 */
 	public function jsonSerialize(): array {
 		return [

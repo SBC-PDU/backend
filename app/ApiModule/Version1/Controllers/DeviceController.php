@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 /**
  * Copyright 2022-2024 Roman Ondráček <mail@romanondracek.cz>
  *
@@ -17,6 +15,8 @@ declare(strict_types = 1);
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+declare(strict_types = 1);
 
 namespace App\ApiModule\Version1\Controllers;
 
@@ -96,11 +96,11 @@ class DeviceController extends BaseController {
 	public function add(ApiRequest $request, ApiResponse $response): ApiResponse {
 		$this->validator->validateRequest('deviceAdd', $request);
 		$json = $request->getJsonBodyCopy();
-		$json['id'] = str_replace([':', '.', '-'], '', strtolower($json['macAddress']));
+		$json['id'] = str_replace([':', '.', '-'], '', strtolower((string) $json['macAddress']));
 		$device = Device::createFromJson($json);
 		try {
 			$this->deviceManager->add($device);
-		} catch (ValueError $e) {
+		} catch (ValueError) {
 			throw new ClientErrorException('Device ID is already used', ApiResponse::S409_CONFLICT);
 		}
 		return $response->withStatus(ApiResponse::S201_CREATED)

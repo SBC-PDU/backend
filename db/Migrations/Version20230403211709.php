@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Copyright 2022-2024 Roman Ondráček <mail@romanondracek.cz>
  *
@@ -18,11 +16,12 @@ declare(strict_types=1);
  * limitations under the License.
  */
 
+declare(strict_types = 1);
+
 namespace Database\Migrations;
 
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
-
 
 /**
  * Adds created_at column to users table
@@ -42,7 +41,6 @@ final class Version20230403211709 extends AbstractMigration {
 	 * @param Schema $schema Database schema
 	 */
 	public function up(Schema $schema): void {
-		// this up() migration is auto-generated, please modify it to your needs
 		$this->addSql('ALTER TABLE users ADD created_at DATETIME NOT NULL');
 	}
 
@@ -51,7 +49,6 @@ final class Version20230403211709 extends AbstractMigration {
 	 * @param Schema $schema Database schema
 	 */
 	public function down(Schema $schema): void {
-		// this down() migration is auto-generated, please modify it to your needs
 		$this->addSql('ALTER TABLE users DROP created_at');
 	}
 

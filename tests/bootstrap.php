@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 /**
  * Copyright 2022-2024 Roman Ondráček <mail@romanondracek.cz>
  *
@@ -18,30 +16,20 @@ declare(strict_types = 1);
  * limitations under the License.
  */
 
+declare(strict_types = 1);
+
 use App\Kernel;
-use Ninjify\Nunjuck\Environment;
+use Contributte\Tester\Environment;
 
 require __DIR__ . '/../vendor/autoload.php';
 
 $configurator = Kernel::boot();
 $configurator->setDebugMode(false);
 $configurator->setTempDirectory(__DIR__ . '/tmp');
+$configurator->setTimeZone('Etc/UTC');
 
 Environment::setupTester();
-Environment::setupTimezone('Etc/GMT-2');
-if (!defined('TESTER_DIR')) {
-	Environment::setupVariables(__DIR__);
-}
-if (basename(__DIR__) === 'tests') {
-	$tempDir = __DIR__ . '/tmp/';
-	@mkdir($tempDir);
-	@mkdir($tempDir . 'certificates/');
-	@mkdir($tempDir . 'configuration/');
-	@mkdir($tempDir . 'configuration/scheduler/');
-	@mkdir($tempDir . 'controller/');
-	@mkdir($tempDir . 'maintenance/');
-	@mkdir($tempDir . 'translator/');
-	@mkdir($tempDir . 'zip/');
-}
+Environment::setupTimezone('Etc/UTC');
+Environment::setupFolders(__DIR__);
 
 return $configurator->createContainer();

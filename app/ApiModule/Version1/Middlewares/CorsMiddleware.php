@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 /**
  * Copyright 2022-2024 Roman Ondráček <mail@romanondracek.cz>
  *
@@ -18,6 +16,8 @@ declare(strict_types = 1);
  * limitations under the License.
  */
 
+declare(strict_types = 1);
+
 namespace App\ApiModule\Version1\Middlewares;
 
 use Contributte\Middlewares\IMiddleware;
@@ -29,6 +29,13 @@ use Psr\Http\Message\ServerRequestInterface;
  */
 class CorsMiddleware implements IMiddleware {
 
+	/**
+	 * Middleware invocation
+	 * @param ServerRequestInterface $request Request
+	 * @param ResponseInterface $response Response
+	 * @param callable(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface $next
+	 * @return ResponseInterface Response
+	 */
 	public function __invoke(
 		ServerRequestInterface $request,
 		ResponseInterface $response,

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 /**
  * Copyright 2022-2024 Roman Ondráček <mail@romanondracek.cz>
  *
@@ -18,10 +16,13 @@ declare(strict_types = 1);
  * limitations under the License.
  */
 
+declare(strict_types = 1);
+
 namespace App\Models\Database;
 
 use Doctrine\ORM\Decorator\EntityManagerDecorator;
 use Doctrine\ORM\EntityRepository;
+use Override;
 
 /**
  * Entity manager
@@ -33,13 +34,13 @@ class EntityManager extends EntityManagerDecorator {
 	/**
 	 * Returns the selected repository
 	 * @internal
-	 * @template T of object
-	 * @param class-string<T> $entityName Entity class name
+	 * @template T of object Entity class
+	 * @param class-string<T> $className Entity class name
 	 * @return EntityRepository<T> Entity repository
-	 * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
 	 */
-	public function getRepository($entityName): EntityRepository {
-		return parent::getRepository($entityName);
+	#[Override]
+	public function getRepository(string $className): EntityRepository {
+		return parent::getRepository($className);
 	}
 
 }

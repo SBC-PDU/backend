@@ -45,7 +45,7 @@ fix-cc: temp/code-checker
 	php temp/code-checker/code-checker -f -l --no-progress --strict-types -i "coverage.*" -i "docs/" -i "tests/temp/"
 
 cs: deps
-	vendor/bin/codesniffer --runtime-set php_version 80100 app bin tests
+	vendor/bin/codesniffer --runtime-set php_version 80300 app bin db tests
 
 deps:
 	composer install
@@ -54,6 +54,9 @@ qa: cs
 
 phpstan: deps
 	NETTE_TESTER_RUNNER=1 vendor/bin/phpstan analyse -c phpstan.neon
+
+rector: deps
+	NETTE_TESTER_RUNNER=1 vendor/bin/rector process --dry-run
 
 run:
 	php -S [::]:8090 -t www/

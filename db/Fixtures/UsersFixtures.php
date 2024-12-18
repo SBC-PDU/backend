@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 /**
  * Copyright 2022-2024 Roman Ondráček <mail@romanondracek.cz>
  *
@@ -18,6 +16,8 @@ declare(strict_types = 1);
  * limitations under the License.
  */
 
+declare(strict_types = 1);
+
 namespace Database\Fixtures;
 
 use App\Models\Database\Entities\User;
@@ -30,12 +30,12 @@ use Doctrine\Persistence\ObjectManager;
 /**
  * Initial user fixture
  */
-class UsersFixture implements FixtureInterface {
+class UsersFixtures implements FixtureInterface {
 
 	/**
 	 * @inheritDoc
 	 */
-	public function load(ObjectManager $manager) {
+	public function load(ObjectManager $manager): void {
 		$users = [
 			new User('Admin', 'admin@romanondracek.cz', 'admin', UserRole::Admin, UserLanguage::English, AccountState::Verified),
 		];
@@ -44,4 +44,5 @@ class UsersFixture implements FixtureInterface {
 		}
 		$manager->flush();
 	}
+
 }

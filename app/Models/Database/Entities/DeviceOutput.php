@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 /**
  * Copyright 2022-2024 Roman Ondráček <mail@romanondracek.cz>
  *
@@ -18,9 +16,12 @@ declare(strict_types = 1);
  * limitations under the License.
  */
 
+declare(strict_types = 1);
+
 namespace App\Models\Database\Entities;
 
 use App\Models\Database\Repositories\DeviceOutputRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use JsonSerializable;
 
@@ -40,13 +41,29 @@ class DeviceOutput implements JsonSerializable {
 	 */
 	public function __construct(
 		#[ORM\Id]
-		#[ORM\Column(name: '`index`', type: 'integer', nullable: false)]
+		#[ORM\Column(
+			name: '`index`',
+			type: Types::INTEGER,
+			nullable: false,
+		)]
 		public readonly int $index,
-		#[ORM\Column(type: 'string', length: 255, nullable: false)]
+		#[ORM\Column(
+			type: Types::STRING,
+			length: 255,
+			nullable: false,
+		)]
 		public string $name,
 		#[ORM\Id]
-		#[ORM\ManyToOne(targetEntity: Device::class, inversedBy: 'outputs')]
-		#[ORM\JoinColumn(name: 'device', referencedColumnName: 'id', onDelete: 'CASCADE')]
+		#[ORM\ManyToOne(
+			targetEntity: Device::class,
+			inversedBy: 'outputs',
+		)]
+		#[ORM\JoinColumn(
+			name: 'device',
+			referencedColumnName: 'id',
+			nullable: false,
+			onDelete: 'CASCADE',
+		)]
 		public readonly Device $device,
 	) {
 	}
@@ -58,12 +75,19 @@ class DeviceOutput implements JsonSerializable {
 	 * @return self Device output entity
 	 */
 	public static function createFromJson(array $json, Device $device): self {
-		return new self($json['index'], $json['name'], $device);
+		return new self(
+			index: $json['index'],
+			name: $json['name'],
+			device: $device,
+		);
 	}
 
 	/**
 	 * Returns device output entity as JSON serializable array
-	 * @return array{index: int, name: string} JSON serializable array
+	 * @return array{
+	 *     index: int,
+	 *     name: string,
+	 * } JSON serializable array
 	 */
 	public function jsonSerialize(): array {
 		return [

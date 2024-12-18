@@ -28,9 +28,8 @@ RUN apt-get update \
  && curl -sL https://deb.nodesource.com/setup_lts.x | bash - \
  && apt-get update \
  && apt-get install --no-install-recommends -yqq composer nodejs \
-    php8.1 php8.1-common php8.1-cgi php8.1-cli php8.1-curl php8.1-pcov php8.1-phpdbg php8.1-mbstring php8.1-mysql php8.1-xml php8.1-zip \
-	php8.2 php8.2-common php8.2-cgi php8.2-cli php8.2-curl php8.2-pcov php8.2-phpdbg php8.2-mbstring php8.2-mysql php8.2-xml php8.2-zip \
-	php8.3 php8.3-common php8.3-cgi php8.3-cli php8.3-curl php8.3-pcov php8.3-phpdbg php8.3-mbstring php8.3-mysql php8.3-xml php8.3-zip \
+    php8.3 php8.3-common php8.3-cgi php8.3-cli php8.3-curl php8.3-pcov php8.3-phpdbg php8.3-mbstring php8.3-mysql php8.3-xml php8.3-zip \
+	php8.4 php8.4-common php8.4-cgi php8.4-cli php8.4-curl php8.4-pcov php8.4-phpdbg php8.4-mbstring php8.4-mysql php8.4-xml php8.4-zip \
     php php-common php-cgi php-cli php-curl php-json php-phpdbg php-pcov php-mbstring php-mysql php-xml php-zip \
  && npm install -g @sentry/cli --unsafe-perm \
  && apt-get clean \

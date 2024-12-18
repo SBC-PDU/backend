@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 /**
  * Copyright 2022-2024 Roman Ondráček <mail@romanondracek.cz>
  *
@@ -18,6 +16,8 @@ declare(strict_types = 1);
  * limitations under the License.
  */
 
+declare(strict_types = 1);
+
 namespace App\Models\Database\Entities;
 
 use App\Models\Database\Attributes\TCreatedAt;
@@ -25,6 +25,7 @@ use App\Models\Database\Repositories\DeviceRepository;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use JsonSerializable;
 use Nette\Utils\Strings;
@@ -47,7 +48,12 @@ class Device implements JsonSerializable {
 	/**
 	 * @var Collection<int, DeviceOutput> Device outputs
 	 */
-	#[ORM\OneToMany(mappedBy: 'device', targetEntity: DeviceOutput::class, cascade: ['all'], orphanRemoval: true)]
+	#[ORM\OneToMany(
+		targetEntity: DeviceOutput::class,
+		mappedBy: 'device',
+		cascade: ['all'],
+		orphanRemoval: true,
+	)]
 	public Collection $outputs;
 
 	/**
@@ -57,9 +63,18 @@ class Device implements JsonSerializable {
 	 */
 	public function __construct(
 		#[ORM\Id]
-		#[ORM\Column(type: 'string', length: 12, unique: true, nullable: false)]
+		#[ORM\Column(
+			type: Types::STRING,
+			length: 12,
+			unique: true,
+			nullable: false,
+		)]
 		public readonly string $id,
-		#[ORM\Column(type: 'string', length: 255, nullable: false)]
+		#[ORM\Column(
+			type: Types::STRING,
+			length: 255,
+			nullable: false,
+		)]
 		public string $name,
 	) {
 		$this->outputs = new ArrayCollection();
@@ -67,20 +82,31 @@ class Device implements JsonSerializable {
 
 	/**
 	 * Creates device entity from JSON serialized device entity
-	 * @param array{id: string, name: string, macAddress: string, outputs: array<array{index: int, name: string}>} $json JSON serialized device entity
+	 * @param array{
+	 *     id: string,
+	 *     name: string,
+	 *     macAddress: string,
+	 *     outputs: array<array{index: int, name: string}>,
+	 * } $json JSON serialized device entity
 	 * @return self Device entity
 	 */
 	public static function createFromJson(array $json): self {
-		$device = new self($json['id'], $json['name']);
+		$device = new self(
+			id: $json['id'],
+			name: $json['name'],
+		);
 		foreach ($json['outputs'] as $output) {
-			$device->addOutput(DeviceOutput::createFromJson($output, $device));
+			$device->addOutput(DeviceOutput::createFromJson(json: $output, device: $device));
 		}
 		return $device;
 	}
 
 	/**
 	 * Edits device entity from JSON serialized device entity
-	 * @param array{name: string, outputs: array<array{index: int, name: string}>} $json JSON serialized device entity
+	 * @param array{
+	 *     name: string,
+	 *     outputs: array<int, array{index: int, name: string}>,
+	 * } $json JSON serialized device entity
 	 */
 	public function editFromJson(array $json): void {
 		$this->name = $json['name'];
@@ -121,7 +147,14 @@ class Device implements JsonSerializable {
 
 	/**
 	 * Returns Device entity as JSON serializable array
-	 * @return array{id: string, name: string, macAddress: string, outputs: array<int, mixed>, createdAt: string, lastSeen: string|null} JSON serializable array
+	 * @return array{
+	 *     id: string,
+	 *     name: string,
+	 *     macAddress: string,
+	 *     outputs: array<int, array{index: int, name: string}>,
+	 *     createdAt: string,
+	 *     lastSeen: string|null,
+	 * } JSON serializable array
 	 */
 	public function jsonSerialize(): array {
 		return [

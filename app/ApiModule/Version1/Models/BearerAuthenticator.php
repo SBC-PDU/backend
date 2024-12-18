@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 /**
  * Copyright 2022-2024 Roman Ondráček <mail@romanondracek.cz>
  *
@@ -17,6 +15,8 @@ declare(strict_types = 1);
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+declare(strict_types = 1);
 
 namespace App\ApiModule\Version1\Models;
 
@@ -72,12 +72,8 @@ class BearerAuthenticator implements IAuthenticator {
 		}
 		try {
 			$id = $token->claims()->get('uid');
-			$user = $this->entityManager->getUserRepository()->find($id);
-			if (!$user instanceof User) {
-				return null;
-			}
-			return $user;
-		} catch (Throwable $e) {
+			return $this->entityManager->getUserRepository()->find($id);
+		} catch (Throwable) {
 			return null;
 		}
 	}

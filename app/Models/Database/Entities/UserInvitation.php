@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 /**
  * Copyright 2022-2024 Roman Ondráček <mail@romanondracek.cz>
  *
@@ -17,6 +15,8 @@ declare(strict_types = 1);
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+declare(strict_types = 1);
 
 namespace App\Models\Database\Entities;
 
@@ -44,7 +44,7 @@ class UserInvitation {
 	 */
 	public function __construct(
 		#[ORM\OneToOne(inversedBy: 'invitation', targetEntity: User::class)]
-		#[ORM\JoinColumn(name: 'user', onDelete: 'CASCADE')]
+		#[ORM\JoinColumn(name: 'user', nullable: false, onDelete: 'CASCADE')]
 		public readonly User $user,
 	) {
 	}

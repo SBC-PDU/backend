@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 /**
  * Copyright 2022-2024 Roman Ondráček <mail@romanondracek.cz>
  *
@@ -18,6 +16,8 @@ declare(strict_types = 1);
  * limitations under the License.
  */
 
+declare(strict_types = 1);
+
 namespace App\Models\Database\Entities;
 
 use App\Exceptions\IncorrectPasswordException;
@@ -33,6 +33,7 @@ use App\Models\Database\Enums\UserRole;
 use App\Models\Database\Repositories\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Egulias\EmailValidator\EmailValidator;
 use Egulias\EmailValidator\Validation\DNSCheckValidation;
@@ -59,7 +60,7 @@ class User implements JsonSerializable {
 	/**
 	 * @var PasswordRecovery|null Password recovery
 	 */
-	#[ORM\OneToOne(mappedBy: 'user', targetEntity: PasswordRecovery::class, cascade: ['persist', 'refresh', 'remove'], orphanRemoval: true)]
+	#[ORM\OneToOne(targetEntity: PasswordRecovery::class, mappedBy: 'user', cascade: ['persist', 'refresh', 'remove'], orphanRemoval: true)]
 	public ?PasswordRecovery $passwordRecovery = null;
 
 	/**
@@ -71,13 +72,13 @@ class User implements JsonSerializable {
 	/**
 	 * @var UserVerification|null User verification
 	 */
-	#[ORM\OneToOne(mappedBy: 'user', targetEntity: UserVerification::class, cascade: ['persist', 'refresh', 'remove'], orphanRemoval: true)]
+	#[ORM\OneToOne(targetEntity: UserVerification::class, mappedBy: 'user', cascade: ['persist', 'refresh', 'remove'], orphanRemoval: true)]
 	public ?UserVerification $verification = null;
 
 	/**
 	 * @var string User's email
 	 */
-	#[ORM\Column(type: 'string', length: 255, unique: true)]
+	#[ORM\Column(type: Types::STRING, length: 255, unique: true)]
 	private string $email;
 
 	/**
@@ -93,7 +94,7 @@ class User implements JsonSerializable {
 	/**
 	 * @var string|null Password hash
 	 */
-	#[ORM\Column(type: 'string', length: 255, nullable: true)]
+	#[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
 	private ?string $password = null;
 
 	/**
@@ -112,13 +113,13 @@ class User implements JsonSerializable {
 	 * @param AccountState $state Account state
 	 */
 	public function __construct(
-		#[ORM\Column(type: 'string', length: 255)]
+		#[ORM\Column(type: Types::STRING, length: 255)]
 		public string $name,
 		string $email,
 		?string $password,
-		#[ORM\Column(type: 'string', length: 15, enumType: UserRole::class)]
+		#[ORM\Column(type: Types::STRING, length: 15, enumType: UserRole::class)]
 		public UserRole $role = UserRole::Normal,
-		#[ORM\Column(type: 'string', length: 7, enumType: UserLanguage::class, options: ['default' => UserLanguage::Default])]
+		#[ORM\Column(type: Types::STRING, length: 7, enumType: UserLanguage::class, options: ['default' => UserLanguage::Default])]
 		public UserLanguage $language = UserLanguage::Default,
 		#[ORM\Column(enumType: AccountState::class, options: ['default' => AccountState::Default])]
 		public AccountState $state = AccountState::Default,

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 /**
  * Copyright 2022-2024 Roman Ondráček <mail@romanondracek.cz>
  *
@@ -17,6 +15,8 @@ declare(strict_types = 1);
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+declare(strict_types = 1);
 
 namespace App\ApiModule\Version1\Middlewares;
 
@@ -39,7 +39,7 @@ class AuthenticationMiddleware implements IMiddleware {
 	/**
 	 * Whitelisted paths
 	 */
-	private const WHITELISTED_PATHS = [
+	private const array WHITELISTED_PATHS = [
 		'/v1/auth/password/recovery' => ['POST'],
 		'/v1/auth/sign/in' => ['POST'],
 		'/v1/openapi' => ['GET'],
@@ -80,13 +80,24 @@ class AuthenticationMiddleware implements IMiddleware {
 	 * @return ResponseInterface Response
 	 */
 	private function createUnauthorizedResponse(ResponseInterface $response, string $message): ResponseInterface {
-		$json = Json::encode(['error' => $message, 'status' => 'error', 'code' => ApiResponse::S401_UNAUTHORIZED]);
+		$json = Json::encode([
+			'error' => $message,
+			'status' => 'error',
+			'code' => ApiResponse::S401_UNAUTHORIZED,
+		]);
 		$response->getBody()->write($json);
 		return $response->withStatus(ApiResponse::S401_UNAUTHORIZED)
 			->withHeader('WWW-Authenticate', 'Bearer')
 			->withHeader('Content-Type', 'application/json');
 	}
 
+	/**
+	 * Middleware invocation
+	 * @param ServerRequestInterface $request Request
+	 * @param ResponseInterface $response Response
+	 * @param callable(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface $next
+	 * @return ResponseInterface Response
+	 */
 	public function __invoke(
 		ServerRequestInterface $request,
 		ResponseInterface $response,
@@ -98,7 +109,7 @@ class AuthenticationMiddleware implements IMiddleware {
 		}
 		try {
 			$identity = $this->authenticator->authenticate($request);
-		} catch (InvalidArgumentException $e) {
+		} catch (InvalidArgumentException) {
 			return $this->createUnauthorizedResponse($response, 'Invalid JWT');
 		}
 		// If we have an identity, then go to next middleware, otherwise stop and return current response

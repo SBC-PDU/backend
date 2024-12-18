@@ -47,42 +47,42 @@ final class UserTest extends TestCase {
 	/**
 	 * User name
 	 */
-	private const USERNAME = 'admin';
+	private const string USERNAME = 'admin';
 
 	/**
 	 * E-mail address
 	 */
-	private const EMAIL = 'admin@romanondracek.cz';
+	private const string EMAIL = 'admin@romanondracek.cz';
 
 	/**
 	 * Password
 	 */
-	private const PASSWORD = 'password';
+	private const string PASSWORD = 'password';
 
 	/**
 	 * User role
 	 */
-	private const ROLE = UserRole::Admin;
+	private const UserRole ROLE = UserRole::Admin;
 
 	/**
 	 * User language
 	 */
-	private const LANGUAGE = UserLanguage::English;
+	private const UserLanguage LANGUAGE = UserLanguage::English;
 
 	/**
 	 * User account state
 	 */
-	private const STATE = AccountState::Unverified;
+	private const AccountState STATE = AccountState::Unverified;
 
 	/**
 	 * User created at
 	 */
-	private const CREATED_AT = '2023-01-01T00:00:00Z';
+	private const string CREATED_AT = '2023-01-01T00:00:00Z';
 
 	/**
 	 * TOTP secret
 	 */
-	private const TOTP_SECRET = 'JDDK4U6G3BJLEZ7Y';
+	private const string TOTP_SECRET = 'JDDK4U6G3BJLEZ7Y';
 
 	/**
 	 * @var User User entity

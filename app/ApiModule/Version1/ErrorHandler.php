@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 /**
  * Copyright 2022-2024 Roman Ondráček <mail@romanondracek.cz>
  *
@@ -18,17 +16,26 @@ declare(strict_types = 1);
  * limitations under the License.
  */
 
+declare(strict_types = 1);
+
 namespace App\ApiModule\Version1;
 
 use Apitte\Core\Dispatcher\DispatchError;
 use Apitte\Core\ErrorHandler\PsrLogErrorHandler;
 use Apitte\Core\Http\ApiResponse;
+use Override;
 
 /**
  * REST API error handler
  */
 class ErrorHandler extends PsrLogErrorHandler {
 
+	/**
+	 * Handles the error
+	 * @param DispatchError $dispatchError Dispatch error
+	 * @return ApiResponse API response
+	 */
+	#[Override]
 	public function handle(DispatchError $dispatchError): ApiResponse {
 		$response = parent::handle($dispatchError);
 		$request = $dispatchError->getRequest();

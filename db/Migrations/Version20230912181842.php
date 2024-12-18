@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Copyright 2022-2024 Roman Ondráček <mail@romanondracek.cz>
  *
@@ -17,6 +15,8 @@ declare(strict_types=1);
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+declare(strict_types = 1);
 
 namespace Database\Migrations;
 
@@ -41,7 +41,6 @@ final class Version20230912181842 extends AbstractMigration {
 	 * @param Schema $schema Database schema
 	 */
 	public function up(Schema $schema): void {
-		// this up() migration is auto-generated, please modify it to your needs
 		$this->addSql('ALTER TABLE user_totp ADD last_used_at DATETIME DEFAULT NULL');
 	}
 
@@ -50,7 +49,6 @@ final class Version20230912181842 extends AbstractMigration {
 	 * @param Schema $schema Database schema
 	 */
 	public function down(Schema $schema): void {
-		// this down() migration is auto-generated, please modify it to your needs
 		$this->addSql('ALTER TABLE user_totp DROP last_used_at');
 	}
 

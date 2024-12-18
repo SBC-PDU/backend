@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 /**
  * Copyright 2022-2024 Roman Ondráček <mail@romanondracek.cz>
  *
@@ -18,11 +16,14 @@ declare(strict_types = 1);
  * limitations under the License.
  */
 
+declare(strict_types = 1);
+
 namespace App\ApiModule\Version1\Models;
 
 use App\CoreModule\Exceptions\InvalidJsonException;
 use App\CoreModule\Exceptions\NonexistentJsonSchemaException;
 use JsonSchema\Validator;
+use Nette\IOException;
 use Nette\Utils\FileSystem;
 use Nette\Utils\Json;
 use Nette\Utils\JsonException;
@@ -43,12 +44,18 @@ class JsonSchemaValidator {
 	 * @param string $schema JSON schema file name
 	 * @param array<mixed>|stdClass $json JSON to validate
 	 * @throws InvalidJsonException
-	 * @throws JsonException
+	 * @throws NonexistentJsonSchemaException
 	 */
 	public function validate(string $schema, array|stdClass $json): void {
 		$this->checkExistence($schema);
 		$validator = new Validator();
-		$jsonSchema = Json::decode(FileSystem::read($this->schemaDir . '/' . $schema . '.json'), forceArrays: true);
+		try {
+			$jsonSchema = Json::decode(FileSystem::read($this->schemaDir . '/' . $schema . '.json'), forceArrays: true);
+		} catch (IOException $e) {
+			throw new NonexistentJsonSchemaException('Cannot read JSON schema ' . $schema . '.', previous: $e);
+		} catch (JsonException $e) {
+			throw new NonexistentJsonSchemaException('Invalid JSON syntax in schema ' . $schema . '.', previous: $e);
+		}
 		$validator->validate($json, $jsonSchema);
 		if (!$validator->isValid()) {
 			$message = 'JSON does not validate. JSON schema: ' . $schema . ' Violations:';

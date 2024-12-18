@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 /**
  * Copyright 2022-2024 Roman Ondráček <mail@romanondracek.cz>
  *
@@ -17,6 +15,8 @@ declare(strict_types = 1);
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+declare(strict_types = 1);
 
 namespace App\ApiModule\Version1\Controllers;
 
@@ -168,7 +168,7 @@ class UsersController extends BaseController {
 		self::checkScopes($request, ['admin']);
 		try {
 			$this->manager->delete($this->getUser($request));
-		} catch (BadMethodCallException $e) {
+		} catch (BadMethodCallException) {
 			throw new ClientErrorException('Admin user deletion forbidden for the single admin user', ApiResponse::S409_CONFLICT);
 		}
 		return $response->withStatus(ApiResponse::S200_OK);

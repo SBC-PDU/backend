@@ -15,6 +15,7 @@
 extensions:
 	console: Contributte\Console\DI\ConsoleExtension(%consoleMode%)
 	console.extra: Contributte\Console\Extra\DI\ConsoleBridgesExtension(%consoleMode%)
+	resource: Contributte\DI\Extension\ResourceExtension
 
 console:
 	name: SBC PDU management
@@ -22,3 +23,9 @@ console:
 	catchExceptions: true
 	autoExit: true
 	url: http://localhost/
+
+resource:
+	resources:
+		App\ConsoleModule\Commands\:
+			paths:
+				- %appDir%/ConsoleModule/Commands

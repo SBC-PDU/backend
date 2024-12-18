@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types = 1);
-
 /**
  * Copyright 2022-2024 Roman Ondráček <mail@romanondracek.cz>
  *
@@ -18,11 +16,12 @@ declare(strict_types = 1);
  * limitations under the License.
  */
 
+declare(strict_types = 1);
+
 namespace App;
 
 use Nette\Bootstrap\Configurator;
 use Nette\Utils\Finder;
-use SplFileInfo;
 
 /**
  * Application's kernel
@@ -44,9 +43,6 @@ class Kernel {
 		$confDir = __DIR__ . '/config';
 		$configurator->addConfig($confDir . '/common.neon');
 		$configurator->addStaticParameters(['confDir' => $confDir]);
-		/**
-		 * @var SplFileInfo $file File info object
-		 */
 		foreach (Finder::findFiles('*Module/config/config.neon')->from(__DIR__) as $file) {
 			$configurator->addConfig($file->getRealPath());
 		}

@@ -13,19 +13,15 @@
 # limitations under the License.
 
 includes:
-	- vendor/phpstan/phpstan-deprecation-rules/rules.neon
-	- vendor/phpstan/phpstan-doctrine/extension.neon
-	- vendor/phpstan/phpstan-nette/extension.neon
-	- vendor/phpstan/phpstan-nette/rules.neon
-	- vendor/phpstan/phpstan-mockery/extension.neon
-	- vendor/phpstan/phpstan-strict-rules/rules.neon
-	- vendor/phpstan/phpstan-symfony/extension.neon
+	- vendor/iqrf/phpstan-config/phpstan.neon
 
 parameters:
 	level: 8
+	phpVersion: 80300
 	paths:
 		- app
 		- bin
+		- db
 		- tests
 	excludePaths:
 		- tests/tmp/*
@@ -33,6 +29,7 @@ parameters:
 		- php
 		- phpt
 	ignoreErrors:
+		- '#^^Parameter \#3 \$next \(callable\(Psr\\Http\\Message\\ServerRequestInterface, Psr\\Http\\Message\\ResponseInterface\): Psr\\Http\\Message\\ResponseInterface\) of method [A-Za-z0-9\\]+::__invoke\(\) should be contravariant with parameter \$next \(callable\(\): mixed\) of method Contributte\\Middlewares\\IMiddleware::__invoke\(\)$#'
 		-
 			message: '#Parameter \$timestamp of method OTPHP\\TOTP::verify\(\) expects int<0, max>|null, int given.#'
 			path: 'app/Models/Database/Entities/UserTotp.php'

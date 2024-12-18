@@ -55,8 +55,7 @@ test:
   parallel:
     matrix:
       - PHP_VERSION:
-          - '8.1'
-          - '8.2'
+          - '8.3'
 
 coverage:
   stage: test
@@ -84,6 +83,6 @@ phpstan:
 
 qa:
   script:
-    - vendor/bin/codesniffer --runtime-set php_version 80100 app bin tests
+    - vendor/bin/codesniffer --runtime-set php_version 80300 app bin tests
   stage: coding-style
   needs: [build-docker-testing]
