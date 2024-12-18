@@ -18,6 +18,7 @@ parameters:
 		dbname: sbc_pdu
 		user: sbc_pdu
 		password: password
+		serverVersion: 10.11.6-MariaDB-0+deb12u1
 	influxdb:
 		url: http://localhost:8086
 		token: ''

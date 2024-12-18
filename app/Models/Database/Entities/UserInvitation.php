@@ -43,8 +43,15 @@ class UserInvitation {
 	 * @param User $user User
 	 */
 	public function __construct(
-		#[ORM\OneToOne(inversedBy: 'invitation', targetEntity: User::class)]
-		#[ORM\JoinColumn(name: 'user', nullable: false, onDelete: 'CASCADE')]
+		#[ORM\OneToOne(
+			targetEntity: User::class,
+			inversedBy: 'invitation',
+		)]
+		#[ORM\JoinColumn(
+			name: 'user',
+			nullable: false,
+			onDelete: 'CASCADE',
+		)]
 		public readonly User $user,
 	) {
 	}

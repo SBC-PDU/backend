@@ -41,7 +41,7 @@ sentry:
 			Contributte\Sentry\Integration\NetteHttpIntegration()
 			Contributte\Sentry\Integration\NetteSecurityIntegration()
 			# Custom
-			App\Models\Sentry\SentryUserIntegration()
+			App\Models\Sentry\Integrations\SentryUserIntegration()
 		]
 		traces_sample_rate:  1.0
 		# Set a sampling rate for profiling - this is relative to traces_sample_rate

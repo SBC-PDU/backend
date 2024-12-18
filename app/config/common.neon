@@ -13,7 +13,10 @@
 # limitations under the License.
 
 services:
+	- App\Models\DeviceManager
 	- App\Models\MqttClientFactory(%mqtt.host%, %mqtt.port%, %mqtt.clientId%, %mqtt.useTls%, %mqtt.username%, %mqtt.password%)
+	- App\Models\TotpManager
+	- App\Models\UserManager
 	- InfluxDB2\Client(%influxdb%)
 
 tracy:

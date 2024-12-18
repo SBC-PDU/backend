@@ -26,6 +26,6 @@ console:
 
 resource:
 	resources:
-		App\ConsoleModule\Commands\:
+		App\Commands\:
 			paths:
-				- %appDir%/ConsoleModule/Commands
+				- %appDir%/Commands

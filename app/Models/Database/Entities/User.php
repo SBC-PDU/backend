@@ -60,25 +60,44 @@ class User implements JsonSerializable {
 	/**
 	 * @var PasswordRecovery|null Password recovery
 	 */
-	#[ORM\OneToOne(targetEntity: PasswordRecovery::class, mappedBy: 'user', cascade: ['persist', 'refresh', 'remove'], orphanRemoval: true)]
+	#[ORM\OneToOne(
+		targetEntity: PasswordRecovery::class,
+		mappedBy: 'user',
+		cascade: ['persist', 'refresh', 'remove'],
+		orphanRemoval: true,
+	)]
 	public ?PasswordRecovery $passwordRecovery = null;
 
 	/**
 	 * @var UserInvitation|null User invitation
 	 */
-	#[ORM\OneToOne(mappedBy: 'user', targetEntity: UserInvitation::class, cascade: ['persist', 'refresh', 'remove'], orphanRemoval: true)]
+	#[ORM\OneToOne(
+		targetEntity: UserInvitation::class,
+		mappedBy: 'user',
+		cascade: ['persist', 'refresh', 'remove'],
+		orphanRemoval: true,
+	)]
 	public ?UserInvitation $invitation = null;
 
 	/**
 	 * @var UserVerification|null User verification
 	 */
-	#[ORM\OneToOne(targetEntity: UserVerification::class, mappedBy: 'user', cascade: ['persist', 'refresh', 'remove'], orphanRemoval: true)]
+	#[ORM\OneToOne(
+		targetEntity: UserVerification::class,
+		mappedBy: 'user',
+		cascade: ['persist', 'refresh', 'remove'],
+		orphanRemoval: true,
+	)]
 	public ?UserVerification $verification = null;
 
 	/**
 	 * @var string User's email
 	 */
-	#[ORM\Column(type: Types::STRING, length: 255, unique: true)]
+	#[ORM\Column(
+		type: Types::STRING,
+		length: 255,
+		unique: true,
+	)]
 	private string $email;
 
 	/**
@@ -94,13 +113,22 @@ class User implements JsonSerializable {
 	/**
 	 * @var string|null Password hash
 	 */
-	#[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
+	#[ORM\Column(
+		type: Types::STRING,
+		length: 255,
+		nullable: true,
+	)]
 	private ?string $password = null;
 
 	/**
 	 * @var Collection<int, UserTotp> User TOTP tokens
 	 */
-	#[ORM\OneToMany(mappedBy: 'user', targetEntity: UserTotp::class, cascade: ['persist', 'refresh', 'remove'], orphanRemoval: true)]
+	#[ORM\OneToMany(
+		targetEntity: UserTotp::class,
+		mappedBy: 'user',
+		cascade: ['persist', 'refresh', 'remove'],
+		orphanRemoval: true,
+	)]
 	private Collection $totp;
 
 	/**
@@ -113,15 +141,30 @@ class User implements JsonSerializable {
 	 * @param AccountState $state Account state
 	 */
 	public function __construct(
-		#[ORM\Column(type: Types::STRING, length: 255)]
+		#[ORM\Column(
+			type: Types::STRING,
+			length: 255,
+		)]
 		public string $name,
 		string $email,
 		?string $password,
-		#[ORM\Column(type: Types::STRING, length: 15, enumType: UserRole::class)]
+		#[ORM\Column(
+			type: Types::STRING,
+			length: 15,
+			enumType: UserRole::class,
+		)]
 		public UserRole $role = UserRole::Normal,
-		#[ORM\Column(type: Types::STRING, length: 7, enumType: UserLanguage::class, options: ['default' => UserLanguage::Default])]
+		#[ORM\Column(
+			type: Types::STRING,
+			length: 7,
+			enumType: UserLanguage::class,
+			options: ['default' => UserLanguage::Default],
+		)]
 		public UserLanguage $language = UserLanguage::Default,
-		#[ORM\Column(enumType: AccountState::class, options: ['default' => AccountState::Default])]
+		#[ORM\Column(
+			enumType: AccountState::class,
+			options: ['default' => AccountState::Default],
+		)]
 		public AccountState $state = AccountState::Default,
 	) {
 		$this->setEmail($email);
@@ -137,24 +180,35 @@ class User implements JsonSerializable {
 
 	/**
 	 * Creates a new user from JSON data
-	 * @param array{name: string, email:string, password?: string, role?:string, language?: string} $json JSON data
+	 * @param array{
+	 *     name: string,
+	 *     email:string,
+	 *     password?: string,
+	 *     role?:string,
+	 *     language?: string,
+	 * } $json JSON data
 	 * @return self User entity
 	 */
 	public static function createFromJson(array $json): self {
 		$password = $json['password'] ?? null;
 		return new self(
-			$json['name'],
-			$json['email'],
-			$password,
-			UserRole::tryFrom($json['role'] ?? UserRole::Default->value) ?? UserRole::Default,
-			UserLanguage::tryFrom($json['language'] ?? UserLanguage::Default->value) ?? UserLanguage::Default,
-			$password === null ? AccountState::Invited : AccountState::Default,
+			name: $json['name'],
+			email: $json['email'],
+			password: $password,
+			role: UserRole::tryFrom($json['role'] ?? UserRole::Default->value) ?? UserRole::Default,
+			language: UserLanguage::tryFrom($json['language'] ?? UserLanguage::Default->value) ?? UserLanguage::Default,
+			state: $password === null ? AccountState::Invited : AccountState::Default,
 		);
 	}
 
 	/**
 	 * Edit user from JSON data
-	 * @param array{name: string, email: string, role?: string, language?: string} $json JSON data
+	 * @param array{
+	 *     name: string,
+	 *     email: string,
+	 *     role?: string,
+	 *     language?: string,
+	 * } $json JSON data
 	 * @throws InvalidEmailAddressException Invalid email address
 	 * @throws InvalidUserLanguageException Invalid user language
 	 * @throws InvalidUserRoleException Invalid user role
@@ -324,7 +378,16 @@ class User implements JsonSerializable {
 
 	/**
 	 * Returns the JSON serialized User entity
-	 * @return array<string, bool|int|string|null> JSON serialized User entity
+	 * @return array{
+	 *     id: int|null,
+	 *     name: string,
+	 *     email: string,
+	 *     role: string,
+	 *     language: string,
+	 *     state: string,
+	 *     createdAt: string,
+	 *     has2Fa: bool,
+	 * } JSON serialized User entity
 	 */
 	public function jsonSerialize(): array {
 		return [

@@ -22,4 +22,4 @@ translation:
 		whitelist: [cs, en]
 		default: en
 	dirs:
-		- %appDir%/lang
+		- %appDir%/../locales

@@ -7,7 +7,7 @@ Tento repozitář obsahuje backendovou část pro centrální správu napájecí
 
 ## Prerekvizity
 
-- PHP 8.1 nebo 8.2
+- PHP 8.3
 - Composer
 - MySQL/MariaDB databáze
 - InfluxDB 2.x databáze
@@ -45,6 +45,7 @@ Tento repozitář obsahuje backendovou část pro centrální správu napájecí
 			dbname: sbc_pdu                                # Název databáze
 			user: sbc_pdu                                  # Uživatelské jméno pro připojení k MySQL/MariaDB serveru
 			password: password                             # Heslo pro připojení k MySQL/MariaDB serveru
+			serverVersion: 10.11.6-MariaDB-0+deb12u1			 # Verze MySQL/MariaDB serveru
 		influxdb:
 			url: http://localhost:8086                     # Adresa InfluxDB serveru
 			token: ''                                      # Token pro připojení k InfluxDB

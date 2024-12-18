@@ -52,7 +52,12 @@ class MqttClientFactory {
 	 * @return MqttClient MQTT client instance
 	 */
 	public function create(): MqttClient {
-		return new MqttClient($this->host, $this->port, $this->clientId . posix_getpid(), MqttClient::MQTT_3_1);
+		return new MqttClient(
+			host: $this->host,
+			port: $this->port,
+			clientId: $this->clientId . posix_getpid(),
+			protocol: MqttClient::MQTT_3_1,
+		);
 	}
 
 	/**

@@ -12,5 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-includes:
-	- ../Version1/config/config.neon
+services:
+	- App\ApiModule\Controllers\Version1\Account\ProfileController
+	- App\ApiModule\Controllers\Version1\Account\TotpController
+	- App\ApiModule\Controllers\Version1\Account\VerificationController
+	- App\ApiModule\Controllers\Version1\Authentication\PasswordController
+	- App\ApiModule\Controllers\Version1\Authentication\SignController
+	- App\ApiModule\Controllers\Version1\Authentication\TokenController
+	- App\ApiModule\Controllers\Version1\DeviceController
+	- App\ApiModule\Controllers\Version1\OpenApiController
+	- App\ApiModule\Controllers\Version1\UsersController
+	apiJsonSchemaValidator:
+		factory: App\ApiModule\Models\JsonSchemaValidator
+		autowired: self
+	- App\ApiModule\Models\BearerAuthenticator
+	- App\ApiModule\Models\JwtConfigurator
+	- App\ApiModule\Models\OpenApiSchemaBuilder
+	restApiSchemaManager:
+		factory: App\ApiModule\Models\RestApiSchemaValidator
+		autowired: self

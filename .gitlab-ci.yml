@@ -20,12 +20,30 @@ stages:
   - coding-style
   - deploy
 
-variables:
-  COMPOSER_CACHE_DIR: temp/composer/cache
+.base_template: &base_template
+  tags:
+    - linux
+    - amd64
 
-cache:
-  paths:
-    - temp/composer/cache
+.coding-style_template: &coding-style_template
+  stage: coding-style
+  needs: [build-docker-testing]
+  <<: *base_template
+
+.test_template: &test_template
+  stage: test
+  needs: [build-docker-testing]
+  <<: *base_template
+
+.composer_template: &composer_template
+  before_script:
+    - cp app/config/local.example.neon app/config/local.neon
+    - composer install --no-progress
+  cache:
+    paths:
+      - temp/composer/cache
+  variables:
+    COMPOSER_CACHE_DIR: temp/composer/cache
 
 build-docker-testing:
   stage: build-docker-testing
@@ -46,43 +64,68 @@ before_script:
   - composer install
 
 test:
-  stage: test
-  script:
+  before_script:
+    - !reference [.composer_template, before_script]
     - update-alternatives --set php /usr/bin/php${PHP_VERSION}
-    - vendor/bin/tester -c ./tests/php.ini ./tests
+  script:
+    - vendor/bin/tester -p phpdbg${PHP_VERSION} -c ./tests/php.ini -s ./tests
   after_script:
     - 'for i in $(find ./tests -name \*.actual); do echo "--- $i"; cat $i; echo; echo; done'
   parallel:
     matrix:
       - PHP_VERSION:
           - '8.3'
+  <<: *test_template
+  <<: *composer_template
 
 coverage:
-  stage: test
+  before_script:
+    - update-alternatives --set php /usr/bin/php8.3
+    - !reference [.composer_template, before_script]
+    - vendor/bin/tester -c ./tests/php-coverage.ini --info
   script:
-    - vendor/bin/tester -c ./tests/php.ini -o none --coverage ./coverage.html --coverage-src ./app ./tests
+    - vendor/bin/tester -c ./tests/php-coverage.ini -o none -o junit:junit.xml --coverage ./coverage.html --coverage-src ./app ./tests
   allow_failure: true
-  coverage: '/^(\d+.\d+)\% covered$/'
+  after_script:
+    - 'for i in $(find ./tests -name \*.actual); do echo "--- $i"; cat $i; echo; echo; done'
+  coverage: '/^\d+% covered/'
   artifacts:
     paths:
       - 'coverage.html'
     expire_in: 2 weeks
+    reports:
+      junit:
+        - junit.xml
+  <<: *test_template
+  <<: *composer_template
 
-coding-style:
+code-checker:
   script:
     - composer create-project nette/code-checker temp/code-checker --no-interaction
     - php temp/code-checker/code-checker -l --no-progress --strict-types -i "coverage.*" -i "tests/temp/"
-  stage: coding-style
-  needs: [build-docker-testing]
+  <<: *coding-style_template
+  <<: *composer_template
 
 phpstan:
   script:
-    - NETTE_TESTER_RUNNER=1 vendor/bin/phpstan analyse -c phpstan.neon
-  stage: coding-style
-  needs: [build-docker-testing]
+    - NETTE_TESTER_RUNNER=1 php vendor/bin/phpstan analyse -c phpstan.neon
+  <<: *coding-style_template
+  <<: *composer_template
 
-qa:
+codesniffer:
   script:
-    - vendor/bin/codesniffer --runtime-set php_version 80300 app bin tests
-  stage: coding-style
-  needs: [build-docker-testing]
+    - vendor/bin/codesniffer --runtime-set php_version 80300 app bin db tests
+  <<: *coding-style_template
+  <<: *composer_template
+
+doctrine_mapping:
+  script:
+    - bin/manager orm:validate-schema --skip-sync
+  <<: *coding-style_template
+  <<: *composer_template
+
+latte_lint:
+  script:
+    - vendor/bin/latte-lint app --strict
+  <<: *coding-style_template
+  <<: *composer_template

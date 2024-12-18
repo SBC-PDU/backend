@@ -49,14 +49,33 @@ class UserTotp implements JsonSerializable {
 	 * @throws InvalidArgumentException Secret cannot be empty
 	 */
 	public function __construct(
-		#[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'totp')]
-		#[ORM\JoinColumn(name: 'user', nullable: false, onDelete: 'CASCADE')]
+		#[ORM\ManyToOne(
+			targetEntity: User::class,
+			inversedBy: 'totp',
+		)]
+		#[ORM\JoinColumn(
+			name: 'user',
+			nullable: false,
+			onDelete: 'CASCADE',
+		)]
 		public readonly User $user,
-		#[ORM\Column(type: Types::STRING, length: 32, unique: true)]
+		#[ORM\Column(
+			type: Types::STRING,
+			length: 32,
+			unique: true,
+		)]
 		public readonly string $secret,
-		#[ORM\Column(type: Types::STRING, length: 255, unique: true)]
+		#[ORM\Column(
+			type: Types::STRING,
+			length: 255,
+			unique: true,
+		)]
 		public string $name,
-		#[ORM\Column(type: 'datetime', nullable: true, options: ['default' => null])]
+		#[ORM\Column(
+			type: Types::DATETIME_MUTABLE,
+			nullable: true,
+			options: ['default' => null],
+		)]
 		public ?DateTime $lastUsedAt = null,
 	) {
 		if ($secret === '') {

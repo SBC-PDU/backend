@@ -35,3 +35,6 @@ api:
 				expansion: list # list|full|none
 				filter: true # true|false|string
 				panel: true
+
+services:
+	api.core.errorHandler: App\ApiModule\ErrorHandler

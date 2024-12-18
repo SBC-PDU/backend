@@ -43,8 +43,15 @@ class PasswordRecovery {
 	 * @param User $user User
 	 */
 	public function __construct(
-		#[ORM\OneToOne(targetEntity: User::class, inversedBy: 'passwordRecovery')]
-		#[ORM\JoinColumn(name: 'user', nullable: false, onDelete: 'CASCADE')]
+		#[ORM\OneToOne(
+			targetEntity: User::class,
+			inversedBy: 'passwordRecovery',
+		)]
+		#[ORM\JoinColumn(
+			name: 'user',
+			nullable: false,
+			onDelete: 'CASCADE',
+		)]
 		public readonly User $user,
 	) {
 	}

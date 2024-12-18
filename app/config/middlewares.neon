@@ -17,10 +17,10 @@ extensions:
 
 services:
 	middleware.auth:
-		factory: App\ApiModule\Version1\Middlewares\AuthenticationMiddleware
+		factory: App\ApiModule\Middlewares\AuthenticationMiddleware
 		tags: [middleware: [priority: 250]]
 	midlleware.cors:
-		factory: App\ApiModule\Version1\Middlewares\CorsMiddleware
+		factory: App\ApiModule\Middlewares\CorsMiddleware
 		tags: [middleware: [priority: 200]]
 	middleware.tryCatch:
 		factory: Contributte\Middlewares\TryCatchMiddleware
