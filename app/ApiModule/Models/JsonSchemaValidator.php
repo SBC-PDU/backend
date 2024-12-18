@@ -37,7 +37,7 @@ class JsonSchemaValidator {
 	/**
 	 * @var string Path to directory with JSON schemas
 	 */
-	private string $schemaDir = __DIR__ . '/../../../../api/schemas';
+	private string $schemaDir = __DIR__ . '/../../../api/schemas';
 
 	/**
 	 * Validates JSON

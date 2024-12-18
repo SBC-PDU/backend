@@ -39,7 +39,7 @@ class JwtConfigurator {
 	 */
 	public function create(): Configuration {
 		$signer = new EcdsaSha256();
-		$dir = __DIR__ . '/../../../cert';
+		$dir = __DIR__ . '/../../cert';
 		try {
 			$privateKey = FileSystem::read($dir . '/privkey.pem');
 			if ($privateKey === '') {
